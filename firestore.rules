@@ -1,56 +1,48 @@
-# create the rules text (single-quoted here-string prevents $(...) interpolation)
-$rules = @'
- // Production Firestore rules — paste exactly as-is
- rules_version = '2';
- service cloud.firestore {
-   match /databases/{database}/documents {
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // users collection
+    match /users/{userId} {
+      // Anyone authenticated can read their own profile
+      allow read: if request.auth != null && request.auth.uid == userId;
 
-     // Users collection
-     match /users/{userId} {
-       allow read: if request.auth != null;
+      // Allow users to create their own profile
+      allow create: if request.auth != null && request.auth.uid == userId;
 
-       allow update, create: if request.auth != null
-         && request.auth.uid == userId
-         && !(request.resource.data.keys().hasAny(['points','sub','adFree','subExpiry','lastDailyClaim']));
+      // Allow updates to only certain safe fields from client (not points or lastAdShown)
+      allow update: if request.auth != null
+        && request.auth.uid == userId
+        && request.resource.data.keys().hasOnly([
+          "name",
+          "email",
+          "photoURL",
+          "note",
+          "partnerCode"
+        ]);
 
-       match /activities/{activityId} {
-         allow create: if request.auth != null && request.auth.uid == userId;
-         allow read: if request.auth != null && request.auth.uid == userId;
-         allow update, delete: if false;
-       }
-     }
+      // Prevent clients from writing sensitive fields (server-only fields)
+      allow write: if false;
+    }
 
-     // Couples collection
-     match /couples/{coupleId} {
-       allow read: if request.auth != null;
+    // couples: allow read for everyone, create only if authenticated
+    match /couples/{docId} {
+      allow read: if true;
+      allow create: if request.auth != null;
+      // updates/deletes should be handled by trusted server / Cloud Functions
+      allow update, delete: if false;
+    }
 
-       allow create: if request.auth != null
-         && request.resource.data.memberA is string
-         && request.resource.data.memberB is string
-         && (request.resource.data.memberA == request.auth.uid || request.resource.data.memberB == request.auth.uid)
-         && (request.resource.data.keys().hasAny(['memberA','memberB']) || request.resource.data.createdAt is timestamp);
+    // activities: allow server and user writes only via server or security rules later
+    match /users/{userId}/activities/{actId} {
+      allow read: if request.auth != null && request.auth.uid == userId;
+      allow create: if false;  // created via Cloud Functions (server)
+      allow update, delete: if false;
+    }
 
-       allow update, delete: if false;
-
-       match /messages/{msgId} {
-         allow create: if request.auth != null
-           && (get(/databases/$(database)/documents/couples/$(coupleId)).data.memberA == request.auth.uid
-             || get(/databases/$(database)/documents/couples/$(coupleId)).data.memberB == request.auth.uid)
-           && request.resource.data.keys().hasAll(['sender','ciphertext','ts'])
-           && request.resource.data.sender == request.auth.uid;
-
-         allow read: if request.auth != null
-           && (get(/databases/$(database)/documents/couples/$(coupleId)).data.memberA == request.auth.uid
-             || get(/databases/$(database)/documents/couples/$(coupleId)).data.memberB == request.auth.uid);
-
-         allow update, delete: if false;
-       }
-     }
-
-     // Default deny
-     match /{document=**} {
-       allow read, write: if false;
-     }
-   }
- }
-'@
+    // fallback
+    match /{document=**} {
+      allow read: if true;
+      allow write: if false;
+    }
+  }
+}

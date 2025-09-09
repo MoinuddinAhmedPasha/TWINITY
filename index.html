@@ -1,251 +1,296 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Twinity — Couples Leaderboard + Encrypted Chat</title>
-  <meta name="description" content="Twinity couples leaderboard with Firebase Auth, subscriptions, and encrypted couple chat" />
-  <style>
-    :root{
-      --bg:#061226; --card:#071428; --muted:#9fb3c8; --accent:#67e8f9; --glass:rgba(255,255,255,0.03);
-      --nav-height:68px; --header-height:72px; --gap:12px;
-    }
-    *{box-sizing:border-box;font-family:Inter,system-ui,Segoe UI,Roboto,Arial}
-    html,body{height:100%;margin:0;background:linear-gradient(180deg,#041025,#071b2a);color:#e6eef6}
-    .app { max-width:1100px;margin:0 auto;min-height:100vh;padding:0 12px;display:flex;flex-direction:column; }
-    header{ height:var(--header-height); display:flex; align-items:center; justify-content:space-between; padding:12px 6px; gap:var(--gap); }
-    .brand{display:flex;gap:10px;align-items:center}
-    .btn{ background:var(--glass); border:1px solid rgba(255,255,255,0.04); padding:8px 10px; border-radius:8px; color:inherit; cursor:pointer; transition:transform .12s ease; }
-    .btn:hover{ transform:translateY(-2px); }
-    .btn.primary{ background:linear-gradient(90deg,#4ade80,#06b6d4); color:#062018; font-weight:600; }
-    .main-shell{ display:flex; gap:16px; padding:12px 0; min-height: calc(100vh - var(--header-height) - var(--nav-height) - 24px); overflow:auto; }
-    .left{ flex:1; min-width:280px; } .right{ width:360px; min-width:260px; }
-    .card{ background:var(--card); padding:12px; border-radius:12px; margin-bottom:12px; box-shadow:0 6px 18px rgba(2,6,23,0.6); }
-    .sub{ color:var(--muted); font-size:13px; }
-    .note{ margin-top:8px;padding:8px;border-radius:8px;background:rgba(255,255,255,0.02); word-break:break-word; }
-    .view{ display:none; opacity:0; transform:translateY(6px); transition:opacity .28s ease, transform .28s ease; }
-    .view.active{ display:block; opacity:1; transform:translateY(0); }
-    .bottom-nav{ position:fixed; left:0; right:0; bottom:0; height:var(--nav-height); background:linear-gradient(180deg,#071428,#061526); display:flex; justify-content:space-around; align-items:center; border-top:1px solid rgba(255,255,255,0.03); gap:4px; z-index:30; }
-    .nav-btn{ flex:1; text-align:center; padding:8px 6px; cursor:pointer; color:var(--muted); display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4px; font-size:13px; transition:color .18s ease; }
-    .nav-btn.active{ color:var(--accent); font-weight:600; }
-    .nav-icon{ font-size:18px; line-height:1; }
-    @media(min-width:1000px){ .bottom-nav{ display:none; } .app{ padding-bottom:24px } .main-shell{ min-height: calc(100vh - var(--header-height) - 24px); } .right{ position:sticky; top:18px; align-self:flex-start; } .view{ display:block; opacity:1; transform:none; } }
-    @media(max-width:420px){ .brand h1{ font-size:18px } .right{ display:none } .main-shell{ min-height: calc(100vh - var(--header-height) - var(--nav-height) - 20px); } }
-    .flex-row{ display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
-    .toast-wrap{ position:fixed; right:14px; bottom:90px; display:flex; flex-direction:column; gap:8px; z-index:1000; max-width:320px; }
-    .toast{ background:#0b1a28; color:#e6eef6; padding:10px 12px; border-radius:10px; box-shadow:0 8px 20px rgba(2,6,23,0.6); border:1px solid rgba(255,255,255,0.03); opacity:0; transform:translateY(6px); animation:toastIn .32s forwards; }
-    .toast.success{ border-left:4px solid #4ade80; }
-    .toast.error{ border-left:4px solid #fb7185; }
-    @keyframes toastIn{ to{ opacity:1; transform:translateY(0);} }
-    input:focus, .btn:focus { outline:2px solid rgba(103,232,249,0.12); outline-offset:2px; }
-    /* Chat box styling */
-    #chatBox{ max-height:420px; overflow:auto; padding:8px; border-radius:8px; background:rgba(255,255,255,0.01); }
-    /* avatars & leaderboard list */
-    .avatar{ width:44px; height:44px; border-radius:50%; object-fit:cover; background:linear-gradient(90deg,#0f172a,#0b1a28); display:inline-block; border:2px solid rgba(255,255,255,0.02); }
-    .global-item{ display:flex; gap:12px; align-items:center; padding:10px; border-radius:10px; background:rgba(255,255,255,0.01); margin-bottom:8px; }
-    .global-item .meta{ flex:1; display:flex; flex-direction:column; }
-    .global-item .rank{ font-weight:700; margin-right:8px; width:56px; text-align:center; }
-    .global-list{ max-height:60vh; overflow:auto; padding-right:6px; }
-    .muted-sm{ font-size:12px; color:var(--muted) }
-    /* sidebar small leaderboard row */
-    .side-row{ display:flex; gap:8px; align-items:center; padding:8px; border-radius:8px; margin-top:6px; background:rgba(255,255,255,0.01); }
-    .side-row .names{ display:flex; flex-direction:column; }
-    .price-tag{ font-weight:700; font-size:14px }
-  </style>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+<title>Twinity — Couples Leaderboard, Chat & Games (Updated)</title>
+<meta name="description" content="Twinity couples leaderboard, encrypted chat and Bubble Shooter with hold-to-release" />
+<style>
+  :root{
+    --bg-1:#041022; --panel:rgba(255,255,255,0.02); --muted:#98b7c6;
+    --accent-mag:#ff5fa8; --accent-teal:#06b6d4; --radius:12px; --header-h:64px; --nav-h:76px;
+  }
+  *{box-sizing:border-box;-webkit-font-smoothing:antialiased}
+  html,body{height:100%;margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial;background:linear-gradient(180deg,#021226,#061428);color:#eaf6fb}
+  .app{height:100vh;display:flex;flex-direction:column;max-width:1100px;margin:0 auto;border-left:1px solid rgba(255,255,255,0.01);border-right:1px solid rgba(255,255,255,0.01)}
+  header{height:var(--header-h);display:flex;align-items:center;justify-content:center;padding:10px 12px;background:linear-gradient(90deg,#071427,#021226);border-bottom:1px solid rgba(255,255,255,0.02);z-index:10;font-weight:800;letter-spacing:1px}
+  main{flex:1;display:flex;flex-direction:column;overflow:hidden}
+  .view-wrap{height:calc(100vh - var(--header-h) - var(--nav-h));overflow:auto;padding:12px;-webkit-overflow-scrolling:touch}
+  .card{background:var(--panel);padding:12px;border-radius:12px;margin-bottom:12px;border:1px solid rgba(255,255,255,0.02);box-shadow:0 10px 30px rgba(2,6,23,0.5)}
+  .btn{padding:10px 12px;border-radius:10px;border:1px solid rgba(255,255,255,0.06);background:transparent;color:inherit;font-weight:700;cursor:pointer}
+  .btn.primary{background:linear-gradient(90deg,var(--accent-mag),var(--accent-teal));border:0;color:#041018}
+  nav.bottom{height:var(--nav-h);display:flex;align-items:center;justify-content:space-around;border-top:1px solid rgba(255,255,255,0.02);background:linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.005));position:sticky;bottom:0;z-index:9}
+  .nav-btn{flex:1;text-align:center;padding:10px 6px;color:var(--muted);cursor:pointer;font-size:13px;display:flex;flex-direction:column;align-items:center;gap:6px}
+  .nav-btn.active{color:var(--accent-teal);font-weight:800}
+  .toast-wrap{position:fixed;right:14px;bottom:96px;z-index:300;display:flex;flex-direction:column;gap:8px}
+  .toast{background:#071a2a;padding:10px 14px;border-radius:10px;color:#eaf6fb;box-shadow:0 8px 30px rgba(0,0,0,0.6);border:1px solid rgba(255,255,255,0.03)}
+  input{padding:10px;border-radius:8px;border:1px solid rgba(255,255,255,0.04);background:transparent;color:inherit}
+  .leaderboard .lb-item{display:flex;align-items:center;gap:12px;padding:8px;border-radius:8px;margin-bottom:6px;background:linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.005))}
+  .leaderboard .avatar{width:44px;height:44px;border-radius:8px;object-fit:cover;cursor:pointer;border:1px solid rgba(255,255,255,0.04)}
+  /* Home */
+  .home-center{display:flex;align-items:center;justify-content:center;padding:24px}
+  .play-big{padding:18px 28px;border-radius:18px;font-size:18px;background:linear-gradient(90deg,var(--accent-mag),var(--accent-teal));border:0;color:#041018;font-weight:900;box-shadow:0 8px 24px rgba(6,182,212,0.08)}
+  .home-helpers{display:flex;flex-direction:row;gap:8px;margin-top:12px;flex-wrap:wrap}
+  .home-helpers .btn{flex:1;min-width:120px}
+  /* Modals */
+  .modal{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,0.7);z-index:9999;padding:12px}
+  .modal.show{display:flex}
+  /* Game modal */
+  .game-shell{width:100%;height:100%;max-width:980px;max-height:900px;border-radius:14px;overflow:hidden;display:flex;flex-direction:column;background:linear-gradient(180deg,#061428,#041226);box-shadow:0 20px 60px rgba(0,0,0,0.6)}
+  .game-top{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-bottom:1px solid rgba(255,255,255,0.02);position:relative}
+  .game-tabs{display:flex;gap:8px;flex-wrap:wrap}
+  .game-tab{padding:8px 12px;border-radius:12px;background:rgba(255,255,255,0.02);cursor:pointer}
+  .game-tab.active{background:linear-gradient(90deg,var(--accent-mag),var(--accent-teal));color:#041018;font-weight:800}
+  .game-body{display:flex;flex:1;position:relative}
+  .game-canvas-wrap{flex:1;display:flex;align-items:stretch;justify-content:stretch;position:relative;background:linear-gradient(180deg,#041022,#021226)}
+  canvas#gameCanvas{width:100%;height:100%;display:block;touch-action:none;background:linear-gradient(180deg,#071428,#061426)}
+  .game-side{width:260px;padding:12px;border-left:1px solid rgba(255,255,255,0.02);display:flex;flex-direction:column;gap:10px}
+  .hud-card{background:rgba(255,255,255,0.02);padding:10px;border-radius:10px}
+  .hud-row{display:flex;justify-content:space-between;align-items:center}
+  .small-muted{color:var(--muted);font-size:13px}
+  .preview-ball{width:48px;height:48px;border-radius:50%;display:inline-block;box-shadow:inset 0 -6px 12px rgba(0,0,0,0.2)}
+  .game-controls{display:flex;gap:8px;align-items:center;justify-content:center;padding:10px}
+  .control-pill{padding:10px 12px;border-radius:12px;background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.04);cursor:pointer}
+  .match3-tile{width:56px;height:56px;border-radius:8px;transition:transform .16s linear, opacity .16s linear}
+  .tile-2048{width:72px;height:72px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:22px;transition:transform .12s ease}
+  /* power bar overlay */
+  .power-bar{position:absolute;left:50%;transform:translateX(-50%);bottom:28px;background:rgba(0,0,0,0.3);padding:6px;border-radius:12px;display:flex;align-items:center;gap:8px;z-index:40}
+  .power-fill{height:8px;background:linear-gradient(90deg,var(--accent-mag),var(--accent-teal));border-radius:8px;width:0}
+  /* visible close */
+  .close-visible{position:absolute;right:12px;top:12px;z-index:60}
+  .close-visible .btn{padding:8px 10px}
+  /* responsive */
+  @media (max-width:900px){
+    .game-side{display:none}
+    .game-shell{max-width:420px;height:90vh}
+  }
+</style>
 </head>
 <body>
-  <div class="app">
-    <header>
-      <div class="brand">
-        <div style="width:46px;height:46px;border-radius:10px;background:linear-gradient(90deg,#67e8f9,#7c3aed);display:flex;align-items:center;justify-content:center;font-weight:700">TA</div>
-        <div>
-          <h1 style="margin:0">Twinity</h1>
-          <div class="sub">Couples-only leaderboard · Encrypted chat</div>
-        </div>
-      </div>
-      <div style="display:flex;gap:8px;align-items:center">
-        <div id="gsi-button-placeholder"></div>
-        <button id="logoutBtn" class="btn" style="display:none">Logout</button>
-      </div>
-    </header>
+  <div class="app" id="app">
+    <header>TWINITY</header>
 
-    <div class="main-shell">
-      <div class="left">
+    <main>
+      <div class="view-wrap" id="views">
         <!-- HOME -->
-        <section id="homeView" class="view card active">
-          <div style="display:flex;justify-content:space-between;align-items:center">
-            <div>
-              <strong id="welcome">Welcome, Guest</strong>
-              <div class="sub" id="status">Not signed in</div>
-            </div>
-            <div style="text-align:right">
-              <div class="sub">Points</div>
-              <div id="points" style="font-weight:700;font-size:20px">0</div>
-            </div>
-          </div>
-
-          <div class="flex-row" style="margin-top:12px">
-            <button id="createPartnerCode" class="btn">Create / Set Partner Code</button>
-            <button id="connectPartner" class="btn">Connect to Partner</button>
-            <button id="openSubs" class="btn">Subscriptions</button>
-            <button id="watchAd" class="btn">Watch Ad (+100)</button>
-          </div>
-
-          <div style="margin-top:12px" class="card">
-            <h3 style="margin:0">Notes</h3>
-            <div id="notes" style="margin-top:8px"></div>
-            <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap">
-              <input id="noteInput" style="flex:1;min-width:160px;padding:8px;border-radius:8px;background:transparent;border:1px solid rgba(255,255,255,0.04)" placeholder="Write a quick note...">
-              <button id="saveNote" class="btn">Save</button>
-            </div>
-          </div>
-
+        <section id="homeView" class="view">
           <div class="card">
-            <h3 style="margin:0">Activity</h3>
-            <div id="activity" style="margin-top:8px"></div>
-          </div>
-        </section>
+            <div style="display:flex;justify-content:space-between;align-items:center">
+              <div>
+                <h3 id="welcome">Welcome, Guest</h3>
+                <div class="sub" id="status">Sign in to enable full features</div>
+              </div>
+              <div style="text-align:right">
+                <div id="points" style="font-weight:800;font-size:20px">0</div>
+              </div>
+            </div>
 
-        <!-- SUBSCRIPTIONS + BUY POINTS -->
-        <section id="subsView" class="view card" aria-hidden="true">
-          <h3>Subscriptions</h3>
-          <p class="sub">Monthly plans (web-simulated here). Android Play Billing hooks are ready for later.</p>
-          <div style="display:flex;flex-direction:column;gap:8px;margin-top:8px">
-            <div class="card" style="display:flex;justify-content:space-between;align-items:center">
-              <div><strong>₹9 / month</strong><div class="sub">200 points/day · No ads</div></div>
-              <button class="btn purchase" data-sku="sub_9">Buy</button>
+            <div class="home-center">
+              <button id="openGamesBtn" class="play-big">Play Games — Earn Points</button>
             </div>
-            <div class="card" style="display:flex;justify-content:space-between;align-items:center">
-              <div><strong>₹18 / month</strong><div class="sub">500 points/day · No ads</div></div>
-              <button class="btn purchase" data-sku="sub_18">Buy</button>
-            </div>
-            <div class="card" style="display:flex;justify-content:space-between;align-items:center">
-              <div><strong>₹90 / month</strong><div class="sub">3000 points/day · No ads</div></div>
-              <button class="btn purchase" data-sku="sub_90">Buy</button>
-            </div>
-            <div class="card" style="display:flex;justify-content:space-between;align-items:center">
-              <div><strong>₹180 / month</strong><div class="sub">9000 points/day · No ads</div></div>
-              <button class="btn purchase" data-sku="sub_180">Buy</button>
-            </div>
-          </div>
 
-          <hr style="margin:12px 0;border:none;border-top:1px solid rgba(255,255,255,0.03)">
-
-          <h4 style="margin:0">Buy Points</h4>
-          <p class="sub">One-time point packs (web-simulated). Native consumable hook available when ready.</p>
-          <div style="display:flex;flex-direction:column;gap:8px;margin-top:8px">
-            <div class="card" style="display:flex;justify-content:space-between;align-items:center">
-              <div><div class="price-tag">₹49</div><div class="sub">10,000 points</div></div>
-              <button class="btn buy-points" data-pack="points_10k">Buy</button>
-            </div>
-            <div class="card" style="display:flex;justify-content:space-between;align-items:center">
-              <div><div class="price-tag">₹99</div><div class="sub">20,000 points</div></div>
-              <button class="btn buy-points" data-pack="points_20k">Buy</button>
-            </div>
-            <div class="card" style="display:flex;justify-content:space-between;align-items:center">
-              <div><div class="price-tag">₹199</div><div class="sub">50,000 points</div></div>
-              <button class="btn buy-points" data-pack="points_50k">Buy</button>
-            </div>
-            <div class="card" style="display:flex;justify-content:space-between;align-items:center">
-              <div><div class="price-tag">₹349</div><div class="sub">100,000 points</div></div>
-              <button class="btn buy-points" data-pack="points_100k">Buy</button>
+            <div class="home-helpers">
+              <button id="connectPartner" class="btn">Connect</button>
+              <button id="createPartner" class="btn">Create Code</button>
+              <button id="watchAd" class="btn">Watch Ad +100</button>
             </div>
           </div>
         </section>
 
-        <!-- PROFILE -->
-        <section id="profileView" class="view card" aria-hidden="true">
-          <h3>Profile</h3>
-          <div class="sub" style="margin-top:8px">Name: <span id="displayName">Guest</span></div>
-          <div class="sub">Email: <span id="displayEmail">—</span></div>
-          <div class="sub">Partner code: <span id="myPartnerCode">—</span> <button id="copyPartnerCode" class="btn" style="margin-left:8px;display:none">Copy</button></div>
-          <div class="sub">Couple: <span id="myCouple">—</span></div>
-          <div class="sub">Subscription: <span id="subStatus">None</span></div>
-          <div style="margin-top:12px"><button id="editProfileBtn" class="btn">Edit Display Name</button></div>
+        <!-- Leaderboard -->
+        <section id="leaderboardView" class="view" style="display:none">
+          <div class="card">
+            <h3>Global Couples Leaderboard</h3>
+            <div style="margin-top:10px"><button id="refreshGlobal" class="btn">Refresh</button></div>
+            <div id="globalLeaderboard" style="margin-top:12px" class="leaderboard"></div>
+          </div>
         </section>
 
-        <!-- CHAT (ENCRYPTED) -->
-        <section id="chatView" class="view card" aria-hidden="true">
-          <h3>Couple Chat</h3>
-          <div class="sub" style="margin-top:6px">Encrypted chat between you and your partner. Messages are stored encrypted — keep your device safe.</div>
-
-          <div id="chatBanner" style="margin-top:10px" class="card">
-            <div id="chatStatus" class="sub">Loading chat status...</div>
+        <!-- Subs -->
+        <section id="subsView" class="view" style="display:none">
+          <div class="card">
+            <h3>Subscriptions & Point Packs</h3>
+            <div id="subscriptionsGrid" style="margin-top:12px" class="grid"></div>
+            <hr style="margin:12px 0;border:none;border-top:1px solid rgba(255,255,255,0.03)">
+            <div id="pointPacksGrid" style="margin-top:12px" class="grid"></div>
           </div>
-
-          <div id="chatBox" style="display:flex;flex-direction:column;gap:8px;max-height:420px;overflow:auto;padding:8px;border-radius:8px;background:rgba(0,0,0,0.02)"></div>
-
-          <div style="display:flex;gap:8px;margin-top:8px">
-            <input id="chatInput" placeholder="Type a message..." style="flex:1;padding:8px;border-radius:8px;background:transparent;border:1px solid rgba(255,255,255,0.04)">
-            <button id="sendChat" class="btn primary">Send</button>
-          </div>
-          <small class="muted-sm">Note: private key stored locally for prototype. If you clear browser storage you may lose access to past messages.</small>
         </section>
 
-        <!-- GLOBAL LEADERBOARD VIEW (full page for mobile/nav) -->
-        <section id="leaderboardView" class="view card" aria-hidden="true">
-          <h3>Global Couples Leaderboard</h3>
-          <p class="sub">Top couples worldwide (showing up to 10,000). Ranks update in realtime.</p>
-          <div style="margin-top:8px">
-            <div style="display:flex;gap:8px;align-items:center;margin-bottom:8px">
-              <input id="globalSearch" placeholder="Search couple or partner name..." style="flex:1;padding:8px;border-radius:8px;background:transparent;border:1px solid rgba(255,255,255,0.04)">
-              <button id="refreshGlobal" class="btn">Refresh</button>
+        <!-- Profile -->
+        <section id="profileView" class="view" style="display:none">
+          <div class="card">
+            <h3>Profile</h3>
+            <div style="display:flex;gap:12px;align-items:center">
+              <img id="profilePhoto" src="https://ui-avatars.com/api/?name=Guest&background=0B1220&color=67e8f9&size=256" alt="avatar" style="width:72px;height:72px;border-radius:12px;object-fit:cover;border:1px solid rgba(255,255,255,0.04)"/>
+              <div style="flex:1">
+                <div class="sub">Name: <span id="displayName">Guest</span></div>
+                <div class="sub">Email: <span id="displayEmail">—</span></div>
+                <div class="sub">Partner code: <span id="myPartnerCode">—</span> <button id="copyPartnerCode" class="btn" style="display:none;margin-left:8px">Copy</button></div>
+                <div class="sub">Couple: <span id="myCouple">—</span></div>
+              </div>
             </div>
-            <div id="globalLeaderboard" class="global-list"></div>
+
+            <div style="margin-top:10px;display:flex;gap:8px;align-items:center">
+              <input id="avatarFile" type="file" accept="image/*" style="display:none"/>
+              <button id="editProfileBtn" class="btn">Edit name</button>
+              <button id="changePhotoBtn" class="btn">Change Photo</button>
+            </div>
+          </div>
+        </section>
+
+        <!-- Chat -->
+        <section id="chatView" class="view" style="display:none">
+          <div class="card">
+            <div id="chatBanner" style="margin-top:10px" class="card"><div id="chatStatus" class="small-muted">Loading chat status...</div></div>
+            <div id="chatBox" style="margin-top:10px"></div>
+            <div style="display:flex;gap:8px;margin-top:8px">
+              <input id="chatInput" placeholder="Type message...">
+              <button id="sendChat" class="btn primary">Send</button>
+            </div>
           </div>
         </section>
       </div>
+    </main>
 
-      <aside class="right">
-        <div class="card">
-          <h3 style="margin:0">Couples Leaderboard</h3>
-          <div id="leaderboard" class="leaderboard" style="margin-top:8px"></div>
-        </div>
+    <nav class="bottom" aria-label="Main">
+      <div class="nav-btn active" data-view="homeView"><div style="font-size:18px">🏠</div><div>Home</div></div>
+      <div class="nav-btn" data-view="leaderboardView"><div style="font-size:18px">🏆</div><div>Leaderboard</div></div>
+      <div class="nav-btn" data-view="subsView"><div style="font-size:18px">⭐</div><div>Subscriptions</div></div>
+      <div class="nav-btn" data-view="profileView"><div style="font-size:18px">👤</div><div>Profile</div></div>
+      <div class="nav-btn" data-view="chatView"><div style="font-size:18px">💬</div><div>Chat</div></div>
+    </nav>
 
-        <div class="card" style="margin-top:12px">
-          <h4 style="margin:0">Quick Profile</h4>
-          <div class="sub" style="margin-top:8px">Points: <span id="quickPoints">0</span></div>
-          <div class="sub">Subscription: <span id="quickSub">None</span></div>
-        </div>
-      </aside>
+    <div class="toast-wrap" id="toastWrap"></div>
+  </div>
+
+  <!-- Image preview modal -->
+  <div id="imageModal" class="modal" aria-hidden="true">
+    <div class="card" style="max-width:920px;width:100%;padding:16px;">
+      <div style="display:flex;justify-content:flex-end"><button id="closeImageModal" class="btn">Close</button></div>
+      <div style="text-align:center;margin-top:8px"><img id="imageModalImg" src="" alt="preview" style="max-width:100%;border-radius:8px;"></div>
     </div>
   </div>
 
-  <!-- bottom nav (mobile) -->
-  <div class="bottom-nav" role="navigation" aria-label="Main">
-    <div class="nav-btn active" data-view="homeView" title="Home"><span class="nav-icon">🏠</span><span class="nav-label">Home</span></div>
-    <div class="nav-btn" data-view="leaderboardView" title="Leaderboard"><span class="nav-icon">🏆</span><span class="nav-label">Leaderboard</span></div>
-    <div class="nav-btn" data-view="subsView" title="Subscriptions"><span class="nav-icon">⭐</span><span class="nav-label">Subscriptions</span></div>
-    <div class="nav-btn" data-view="profileView" title="Profile"><span class="nav-icon">👤</span><span class="nav-label">Profile</span></div>
-    <div class="nav-btn" data-view="chatView" title="Chat"><span class="nav-icon">💬</span><span class="nav-label">Chat</span></div>
-  </div>
-
-  <!-- connect modal -->
-  <div id="connectModal" style="display:none;position:fixed;inset:0;align-items:center;justify-content:center;background:rgba(2,6,23,0.6);z-index:60">
-    <div style="width:420px;background:#071428;padding:16px;border-radius:12px">
-      <h3>Connect with Partner</h3>
-      <p class="sub">Enter your partner's code (both users must create codes and sign in first).</p>
-      <input id="partnerCodeInput" placeholder="Partner code" style="width:100%;padding:8px;border-radius:8px;border:1px solid rgba(255,255,255,0.04);background:transparent;color:inherit">
-      <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:12px">
-        <button id="doConnect" class="btn primary">Connect</button>
-        <button id="closeConnect" class="btn">Close</button>
+  <!-- Connect modal -->
+  <div id="connectModal" class="modal" aria-hidden="true">
+    <div class="inner">
+      <div style="margin:auto;max-width:720px;padding:18px;background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));border-radius:12px;">
+        <h3>Connect with partner</h3>
+        <div style="margin-top:12px;display:flex;flex-direction:column;gap:8px">
+          <input id="partnerCodeInput" placeholder="Partner code (6 chars)">
+          <label class="small-muted">Relationship start date</label>
+          <input id="relationshipStartInput" type="date">
+          <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:8px">
+            <button id="doConnect" class="btn primary">Connect</button>
+            <button id="closeConnect" class="btn">Close</button>
+          </div>
+        </div>
       </div>
     </div>
   </div>
 
-  <div class="toast-wrap" id="toastWrap"></div>
+  <!-- GAME modal (polished) -->
+  <div id="gameModal" class="modal" aria-hidden="true">
+    <div class="game-shell" role="dialog" aria-modal="true">
+      <div class="game-top">
+        <div style="display:flex;align-items:center;gap:12px">
+          <div class="game-tabs" id="gameTabsTop">
+            <div class="game-tab active" data-game="bubble">Bubble Shooter</div>
+            <div class="game-tab" data-game="match3">Match-3</div>
+            <div class="game-tab" data-game="2048">2048</div>
+          </div>
+          <div style="margin-left:12px;color:var(--muted)">Play to earn Twinity points</div>
+        </div>
 
-  <!-- Firebase SDKs (compat) -->
+        <div style="display:flex;gap:8px;align-items:center">
+          <div id="gameScoreSmall" class="small-muted">Score: 0</div>
+          <button id="pauseResume" class="btn">⏸</button>
+        </div>
+
+        <div class="close-visible">
+          <button id="closeGame" class="btn">✕</button>
+        </div>
+      </div>
+
+      <div class="game-body">
+        <div class="game-canvas-wrap">
+          <canvas id="gameCanvas" width="1600" height="900" aria-label="Bubble Shooter"></canvas>
+
+          <!-- HUD overlays for bubble -->
+          <div style="position:absolute;left:12px;top:12px;z-index:5;pointer-events:none">
+            <div class="hud-card" style="padding:8px;border-radius:10px;opacity:0.95">
+              <div style="font-weight:800">Level <span id="hudLevel">1</span></div>
+              <div class="small-muted">Score <span id="hudScore">0</span></div>
+            </div>
+          </div>
+
+          <!-- power bar (appears when charging) -->
+          <div id="powerBar" class="power-bar" style="display:none">
+            <div style="font-weight:800;font-size:13px">Power</div>
+            <div style="width:160px;height:10px;background:rgba(255,255,255,0.06);border-radius:8px;overflow:hidden">
+              <div id="powerFill" class="power-fill"></div>
+            </div>
+          </div>
+
+        </div>
+
+        <div class="game-side">
+          <div class="hud-card">
+            <div style="display:flex;justify-content:space-between;align-items:center">
+              <div style="font-weight:800">Next</div>
+              <div id="nextPreview" class="preview-ball"></div>
+            </div>
+            <div style="margin-top:10px" class="small-muted">Aim & hold to charge, release to shoot. Use walls to bounce.</div>
+          </div>
+
+          <div class="hud-card">
+            <div style="display:flex;justify-content:space-between;align-items:center">
+              <div style="font-weight:800">Controls</div>
+            </div>
+            <div style="margin-top:8px;display:flex;flex-direction:column;gap:8px">
+              <button id="shootBtn2" class="control-pill">Shoot</button>
+              <button id="resetBtn2" class="control-pill">Reset</button>
+              <button id="claimLevelBtn" class="control-pill primary">Claim Level (+ pts)</button>
+            </div>
+          </div>
+
+          <div class="hud-card" style="margin-top:auto">
+            <div style="font-weight:800">Game tips</div>
+            <div class="small-muted" style="margin-top:8px">Clear clusters to score. Bigger clusters = more points. Watch ads to double rewards.</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- login modal -->
+  <div id="loginModal" class="modal show" aria-hidden="false">
+    <div class="inner">
+      <div style="margin:auto;max-width:720px;padding:18px;background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));border-radius:12px;">
+        <div style="margin-top:12px;display:flex;flex-direction:column;gap:8px">
+          <div id="gsi-login-placeholder"></div>
+          <input id="loginEmail" placeholder="Email" type="email">
+          <input id="loginPass" placeholder="Password" type="password">
+          <div style="display:flex;justify-content:flex-end;gap:8px">
+            <button id="emailSignIn" class="btn primary">Sign in</button>
+            <button id="emailSignUp" class="btn">Create</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Firebase SDKs -->
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-storage-compat.js"></script>
 
   <script>
-  /**********************
-   Full app script (updated: profile pics + buy points)
-  **********************/
-
-  // ---------- CONFIG ----------
+  /* ===========================
+     Config & Firebase init
+     =========================== */
   const firebaseConfig = {
     apiKey: "AIzaSyBsbqTVszuJDkp8Ut19YnoH5Y35sNxuImA",
     authDomain: "twinity-d2ba5.firebaseapp.com",
@@ -255,578 +300,996 @@
     appId: "1:1008106990334:web:f04aaf6a36700115e8d3af",
     measurementId: "G-6LCD1DQQ1S"
   };
-
-  const SUBSCRIPTIONS = {
-    'sub_9': {price:9, pointsPerLogin:200, label:'₹9 / month'},
-    'sub_18': {price:18, pointsPerLogin:500, label:'₹18 / month'},
-    'sub_90': {price:90, pointsPerLogin:3000, label:'₹90 / month'},
-    'sub_180': {price:180, pointsPerLogin:9000, label:'₹180 / month'}
-  };
-
-  // point packs
-  const POINT_PACKS = {
-    'points_10k': {price:49, points:10000, label:'₹49 — 10,000 pts'},
-    'points_20k': {price:99, points:20000, label:'₹99 — 20,000 pts'},
-    'points_50k': {price:199, points:50000, label:'₹199 — 50,000 pts'},
-    'points_100k': {price:349, points:100000, label:'₹349 — 100,000 pts'}
-  };
-
-  // ---------- INIT FIREBASE ----------
+  const FUNCTIONS_BASE = "https://us-central1-twinity-d2ba5.cloudfunctions.net";
   firebase.initializeApp(firebaseConfig);
   const auth = firebase.auth();
   const db = firebase.firestore();
+  const storage = firebase.storage();
 
-  // helpers
   const $ = id => document.getElementById(id);
-  const qAll = sel => Array.from(document.querySelectorAll(sel));
-
-  // toasts
-  function showToast(text, type='info', time=3000){
+  function showToast(text, ms=2200){
     const wrap = $('toastWrap');
-    const t = document.createElement('div');
-    t.className = 'toast ' + (type==='success' ? 'success' : type==='error' ? 'error' : '');
-    t.innerText = text;
-    wrap.appendChild(t);
-    setTimeout(()=> t.style.opacity = '1', 10);
-    setTimeout(()=>{ t.style.opacity = '0'; t.style.transform = 'translateY(6px)'; setTimeout(()=>wrap.removeChild(t), 320); }, time);
+    const el = document.createElement('div'); el.className='toast'; el.innerText = text;
+    wrap.appendChild(el); setTimeout(()=> el.style.opacity=1, 20);
+    setTimeout(()=> { el.style.transition='opacity .24s'; el.style.opacity=0; setTimeout(()=> wrap.removeChild(el), 260); }, ms);
   }
 
-  // nav handling
+  /* ---------------------------
+     Basic UI & Auth wiring
+     --------------------------- */
+  const navButtons = Array.from(document.querySelectorAll('.nav-btn'));
+  const views = Array.from(document.querySelectorAll('.view'));
   function showView(id){
-    qAll('.view').forEach(v=>v.classList.remove('active'));
-    const el = $(id); if(el) el.classList.add('active');
-    qAll('.nav-btn').forEach(b=>b.classList.toggle('active', b.dataset.view === id));
-    document.querySelector('.main-shell').scrollTop = 0;
+    views.forEach(v => v.style.display = v.id === id ? 'block' : 'none');
+    navButtons.forEach(b => b.classList.toggle('active', b.dataset.view === id));
+    document.querySelector('.view-wrap').scrollTop = 0;
   }
-  qAll('.nav-btn').forEach(b=>b.addEventListener('click', ()=> {
-    showView(b.dataset.view);
-    if(b.dataset.view === 'chatView' && auth.currentUser) {
-      ensureKeyPairForCurrentUser().then(()=> openChatForCurrentUser()).catch(()=>{});
+  navButtons.forEach(b => b.addEventListener('click', ()=> showView(b.dataset.view)));
+  showView('homeView');
+
+  (function initAuthButton(){
+    const lp = $('gsi-login-placeholder');
+    if(lp){
+      lp.innerHTML='';
+      const btn = document.createElement('button'); btn.className='btn'; btn.innerText='Sign in with Google';
+      btn.addEventListener('click', async ()=> {
+        const provider = new firebase.auth.GoogleAuthProvider();
+        try{ await auth.signInWithPopup(provider); showToast('Signed in'); } catch(e){ console.error(e); showToast('Sign-in failed'); }
+      });
+      lp.appendChild(btn);
     }
-    if(b.dataset.view === 'leaderboardView') renderGlobalLeaderboard();
-  }));
+  })();
 
-  // auth UI (firebase popup)
-  function initAuthUI(){
-    const placeholder = $('gsi-button-placeholder');
-    placeholder.innerHTML = '';
-    const btn = document.createElement('button'); btn.className='btn'; btn.innerText='Sign in with Google';
-    btn.onclick = async ()=> {
-      const provider = new firebase.auth.GoogleAuthProvider();
-      try{ await auth.signInWithPopup(provider); showToast('Signed in','success',1400); } catch(err){ console.error('signin',err); showToast('Sign-in failed','error',3000); }
-    };
-    placeholder.appendChild(btn);
-  }
-
-  // escape
-  function escapeHtml(s){ return String(s||'').replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;'); }
-
-  // user document helpers
   async function createOrUpdateUserDoc(user){
     try{
       const ref = db.collection('users').doc(user.uid);
-      await ref.set({ name: user.displayName || 'Guest', email: user.email || null, photoURL: user.photoURL || null }, { merge: true });
-      const snap = await ref.get();
-      const data = snap.exists ? snap.data() : {};
-      if(!data.partnerCode){
-        await ref.update({ partnerCode: user.uid.slice(0,6).toUpperCase(), points: 0 });
-      }
-    }catch(err){ console.error('createOrUpdateUserDoc',err); showToast('Firebase error','error',3500); }
+      await ref.set({ name: user.displayName || 'Guest', email: user.email || null, photoURL: user.photoURL || null }, { merge:true });
+      const snap = await ref.get(); const data = snap.exists ? snap.data() : {};
+      if(!data.partnerCode) await ref.update({ partnerCode: user.uid.slice(0,6).toUpperCase(), points: data.points || 0 });
+    }catch(e){ console.error(e); showToast('Profile save failed'); }
   }
-  async function getUserProfile(uid){
-    try{ const snap = await db.collection('users').doc(uid).get(); return snap.exists ? { id: uid, ...snap.data() } : null; }catch(err){ console.error('getUserProfile',err); return null; }
-  }
+  async function getUserProfile(uid){ try{ const s = await db.collection('users').doc(uid).get(); return s.exists ? { id: uid, ...s.data() } : null; }catch(e){ console.error(e); return null; } }
 
-  // util: avatar URL or fallback
-  function avatarFor(userProfile){
-    if(!userProfile) return 'https://ui-avatars.com/api/?name=User&background=0B1220&color=67e8f9&size=256';
-    if(userProfile.photoURL) return userProfile.photoURL;
-    return `https://ui-avatars.com/api/?name=${encodeURIComponent(userProfile.name||'User')}&background=0B1220&color=67e8f9&size=256`;
-  }
-
-  // ---------------- Sidebar leaderboard (small list with avatars) ----------------
-  async function renderSidebarLeaderboard(){
-    try{
-      const lb = $('leaderboard'); lb.innerHTML='Loading...';
-      const snaps = await db.collection('couples').get();
-      const couples = [];
-      const profileCache = {};
-      for(const d of snaps.docs){
-        const c = d.data();
-        const aId = c.memberA, bId = c.memberB;
-        if(!profileCache[aId]) profileCache[aId] = (await getUserProfile(aId)) || { name:'Unknown', points:0, photoURL:null };
-        if(!profileCache[bId]) profileCache[bId] = (await getUserProfile(bId)) || { name:'Unknown', points:0, photoURL:null };
-        const a = profileCache[aId], b = profileCache[bId];
-        const combined = (a.points || 0) + (b.points || 0);
-        couples.push({ id:d.id, a:{id:aId, ...a}, b:{id:bId, ...b}, combined });
-      }
-      couples.sort((x,y)=> y.combined - x.combined);
-      lb.innerHTML = '';
-      couples.slice(0,8).forEach((it, idx) => {
-        const row = document.createElement('div');
-        row.className = 'side-row';
-        const avaA = document.createElement('img'); avaA.className='avatar'; avaA.src = avatarFor(it.a);
-        const avaB = document.createElement('img'); avaB.className='avatar'; avaB.src = avatarFor(it.b);
-        const names = document.createElement('div'); names.className='names';
-        const title = document.createElement('div'); title.style.fontWeight='700'; title.innerText = `${it.a.name} & ${it.b.name}`;
-        const sub = document.createElement('div'); sub.className='sub'; sub.innerText = `${it.combined} pts · ${it.a.points||0} + ${it.b.points||0}`;
-        names.appendChild(title); names.appendChild(sub);
-        const rank = document.createElement('div'); rank.style.fontWeight='700'; rank.innerText = `#${idx+1}`;
-        row.appendChild(avaA); row.appendChild(avaB); row.appendChild(names); row.appendChild(rank);
-        lb.appendChild(row);
-      });
-      if(couples.length===0) lb.innerHTML = '<div class="sub">No couples yet — connect with a partner to appear on the leaderboard.</div>';
-      const me = auth.currentUser;
-      if(me){ const up = await getUserProfile(me.uid); $('quickPoints').innerText = up?.points || 0; $('quickSub').innerText = up?.sub || 'None'; $('points').innerText = up?.points || 0; }
-    }catch(err){ console.error('renderSidebarLeaderboard',err); $('leaderboard').innerHTML = '<div class="sub">Unable to load leaderboard.</div>'; showToast('Unable to load leaderboard','error',3500); }
-  }
-
-  // ---------------- Global leaderboard (big list up to 10k) ----------------
-  async function renderGlobalLeaderboard(){
-    try{
-      const container = $('globalLeaderboard');
-      container.innerHTML = '<div class="sub">Loading leaderboard…</div>';
-      const couplesSnap = await db.collection('couples').get();
-      const couples = [];
-      const profileCache = {};
-      const userIds = new Set();
-      for(const d of couplesSnap.docs){ const c = d.data(); userIds.add(c.memberA); userIds.add(c.memberB); }
-      // fetch profiles (simple sequential approach—works but could be optimized with server-side/Cloud Function)
-      for(const uid of Array.from(userIds)){ profileCache[uid] = await getUserProfile(uid) || { name:'Unknown', points:0, photoURL:null }; }
-      for(const d of couplesSnap.docs){
-        const c = d.data();
-        const a = profileCache[c.memberA] || { name:'Unknown', points:0, photoURL:null };
-        const b = profileCache[c.memberB] || { name:'Unknown', points:0, photoURL:null };
-        const combined = (a.points || 0) + (b.points || 0);
-        couples.push({ id:d.id, a:{id:c.memberA, ...a}, b:{id:c.memberB, ...b}, combined });
-      }
-      couples.sort((x,y)=> y.combined - x.combined);
-      const top = couples.slice(0,10000);
-      const q = $('globalSearch').value.trim().toLowerCase();
-      container.innerHTML = '';
-      const filtered = q ? top.filter(t => (`${t.a.name} ${t.b.name}`).toLowerCase().includes(q)) : top;
-      if(filtered.length === 0){ container.innerHTML = '<div class="sub">No entries found.</div>'; return; }
-      filtered.forEach((it, idx) => {
-        const wrapper = document.createElement('div');
-        wrapper.className = 'global-item';
-        const rank = document.createElement('div'); rank.className='rank'; rank.innerHTML = `#${idx+1}`;
-        const avatarA = document.createElement('img'); avatarA.className='avatar'; avatarA.src = avatarFor(it.a);
-        const avatarB = document.createElement('img'); avatarB.className='avatar'; avatarB.src = avatarFor(it.b);
-        const avatarsWrap = document.createElement('div'); avatarsWrap.style.display='flex'; avatarsWrap.style.gap='8px'; avatarsWrap.appendChild(avatarA); avatarsWrap.appendChild(avatarB);
-        const meta = document.createElement('div'); meta.className='meta';
-        const title = document.createElement('div'); title.style.fontWeight='700'; title.innerText = `${it.a.name} & ${it.b.name}`;
-        const sub = document.createElement('div'); sub.className='sub'; sub.innerText = `${it.combined} points · ${it.a.points||0} + ${it.b.points||0}`;
-        meta.appendChild(title); meta.appendChild(sub);
-        wrapper.appendChild(rank); wrapper.appendChild(avatarsWrap); wrapper.appendChild(meta);
-        container.appendChild(wrapper);
-      });
-    }catch(err){ console.error('renderGlobalLeaderboard',err); $('globalLeaderboard').innerHTML = '<div class="sub">Unable to load global leaderboard.</div>'; showToast('Unable to load leaderboard','error',3500); }
-  }
-
-  // activity
-  async function renderActivity(uid){
-    try{
-      const act = $('activity'); act.innerHTML = 'Loading...';
-      const snaps = await db.collection('users').doc(uid).collection('activities').orderBy('time','desc').limit(10).get();
-      act.innerHTML = '';
-      snaps.forEach(s => {
-        const d = s.data();
-        const div = document.createElement('div');
-        div.className = 'sub';
-        div.style.marginTop = '6px';
-        div.innerHTML = `${escapeHtml(d.text)} <div class="sub">${d.time?.toDate ? d.time.toDate().toLocaleString() : new Date(d.time).toLocaleString()}</div>`;
-        act.appendChild(div);
-      });
-      if(snaps.empty) act.innerHTML = '<div class="sub">No activity yet.</div>';
-    }catch(err){ console.error('renderActivity',err); $('activity').innerHTML = '<div class="sub">Unable to load activity.</div>'; showToast('Unable to load activity','error',3000); }
-  }
-
-  async function addActivityFor(uid, text){
-    try{ await db.collection('users').doc(uid).collection('activities').add({ text, time: firebase.firestore.FieldValue.serverTimestamp() }); }catch(err){ console.error('addActivityFor',err); }
-  }
-
-  // auth state changes
   let userUnsub = null;
   auth.onAuthStateChanged(async user => {
     if(user){
-      $('logoutBtn').style.display = 'inline-block';
-      $('gsi-button-placeholder').style.display = 'none';
+      $('loginModal').classList.remove('show');
       await createOrUpdateUserDoc(user);
       if(userUnsub) userUnsub();
       userUnsub = db.collection('users').doc(user.uid).onSnapshot(()=> loadCurrentUserToUI(user.uid));
       await loadCurrentUserToUI(user.uid);
-      showToast('Signed in', 'success', 1200);
-
-      // pass UID to Android WebView native bridge (so native billing can attach user)
-      try{
-        if(window.AndroidBridge && typeof window.AndroidBridge.setUserUid === 'function'){
-          window.AndroidBridge.setUserUid(user.uid);
-        }
-      }catch(e){ console.warn('AndroidBridge not available', e); }
-
+      showToast('Signed in');
     } else {
-      $('logoutBtn').style.display = 'none';
-      $('gsi-button-placeholder').style.display = 'block';
+      $('loginModal').classList.add('show');
       renderSignedOutUI();
-      if(userUnsub) userUnsub();
     }
-    // always refresh leaderboards
-    renderSidebarLeaderboard();
-    if(document.querySelector('.nav-btn.active')?.dataset.view === 'leaderboardView') renderGlobalLeaderboard();
+    renderSubscriptionsGridNow();
+    renderLeaderboard();
   });
 
   function renderSignedOutUI(){
     $('welcome').innerText = 'Welcome, Guest';
     $('status').innerText = 'Not signed in';
     $('points').innerText = '0';
-    $('displayName').innerText = 'Guest';
-    $('displayEmail').innerText = '—';
-    $('myPartnerCode').innerText = '—'; $('copyPartnerCode').style.display = 'none';
-    $('myCouple').innerText = '—'; $('subStatus').innerText = 'None';
-    $('notes').innerHTML = ''; $('activity').innerHTML = '';
+    if($('displayName')) $('displayName').innerText = 'Guest';
+    if($('displayEmail')) $('displayEmail').innerText = '—';
+    if($('profilePhoto')) $('profilePhoto').src = 'https://ui-avatars.com/api/?name=Guest&background=0B1220&color=67e8f9&size=256';
   }
 
-  // load current user UI & relationship timer
   async function loadCurrentUserToUI(uid){
     const profile = await getUserProfile(uid);
     if(!profile) return;
-    $('welcome').innerText = `Welcome, ${profile.name}`;
-    $('status').innerText = 'Signed in with Google';
+    $('welcome').innerText = 'Welcome, ' + (profile.name || 'Guest');
+    $('status').innerText = 'Signed in';
     $('points').innerText = profile.points || 0;
-    $('displayName').innerText = profile.name || 'Guest';
-    $('displayEmail').innerText = profile.email || '—';
-    $('myPartnerCode').innerText = profile.partnerCode || '—';
-    $('copyPartnerCode').style.display = profile.partnerCode ? 'inline-block' : 'none';
-    $('subStatus').innerText = profile.sub ? `${profile.sub} (active)` : 'None';
-
-    // couple lookup
-    let coupleDoc = null;
-    const coupleSnapA = await db.collection('couples').where('memberA','==',uid).get();
-    if(!coupleSnapA.empty) coupleDoc = coupleSnapA.docs[0];
-    else {
-      const coupleSnapB = await db.collection('couples').where('memberB','==',uid).get();
-      if(!coupleSnapB.empty) coupleDoc = coupleSnapB.docs[0];
-    }
-    if(coupleDoc){
-      const c = coupleDoc.data();
-      const partnerId = c.memberA === uid ? c.memberB : c.memberA;
-      const pSnap = await db.collection('users').doc(partnerId).get();
-      const partnerName = pSnap.exists ? pSnap.data().name : '—';
-      const createdAt = c.createdAt && c.createdAt.toDate ? c.createdAt.toDate() : (c.createdAt ? new Date(c.createdAt) : new Date());
-      const days = Math.floor((Date.now() - createdAt)/ (24*60*60*1000));
-      $('myCouple').innerText = `${profile.name} & ${partnerName} · ${days} day${days===1?'':'s'}`;
-    } else {
-      $('myCouple').innerText = '—';
-    }
-
-    // reload note & activity
-    $('notes').innerHTML = '';
-    if(profile.note){ const d = document.createElement('div'); d.className='note'; d.innerText = profile.note; $('notes').appendChild(d); }
-    await renderActivity(uid);
-    await grantDailyIfEligible(uid);
+    if($('displayName')) $('displayName').innerText = profile.name || 'Guest';
+    if($('displayEmail')) $('displayEmail').innerText = profile.email || '—';
+    if($('profilePhoto')) $('profilePhoto').src = profile.photoURL || ('https://ui-avatars.com/api/?name='+encodeURIComponent(profile.name||'Guest'));
   }
 
-  // create/set partner code (already implemented above)
-  // (code unchanged — omitted here for brevity in presentation but included below)...
-
-  // copy partner code
-  $('copyPartnerCode').addEventListener('click', ()=>{ const code = $('myPartnerCode').innerText; if(!code || code === '—') return showToast('No partner code to copy','error'); navigator.clipboard?.writeText(code).then(()=> showToast('Partner code copied','success')).catch(()=> { prompt('Copy this code:', code); }); });
-
-  // connect modal wiring (already implemented above)
-  // (doConnect and createPartnerCode code is present earlier in file)
-
-  // notes handling (already implemented above)
-  // watch ad implementation (already implemented above)
-
-  // purchase handlers (subscriptions & point packs) — updated to handle buy-points
-  qAll('.purchase').forEach(btn => btn.addEventListener('click', async e=>{
-    if(!auth.currentUser){ initAuthUI(); return; }
-    const sku = e.currentTarget.dataset.sku; const uid = auth.currentUser.uid;
+  /* ---------------------------
+     Leaderboard & avatars
+     --------------------------- */
+  async function renderLeaderboard(){
     try{
-      if(window.AndroidBridge && typeof window.AndroidBridge.purchaseSubscription === 'function'){
-        window.AndroidBridge.purchaseSubscription(sku);
-        await addActivityFor(uid, `Requested native purchase ${sku}`);
-        showToast('Native purchase requested','info',1500);
-        return;
+      const snaps = await db.collection('couples').get();
+      const container = $('globalLeaderboard'); container.innerHTML = '';
+      const arr = []; const pc = {};
+      for(const d of snaps.docs){
+        const c = d.data(); const aId = c.memberA, bId = c.memberB;
+        if(!pc[aId]) pc[aId] = await getUserProfile(aId) || { name:'Unknown', points:0, photoURL:null, id:aId };
+        if(!pc[bId]) pc[bId] = await getUserProfile(bId) || { name:'Unknown', points:0, photoURL:null, id:bId };
+        const a = pc[aId], b = pc[bId];
+        arr.push({ a, b, combined: (a.points||0) + (b.points||0) });
       }
-      if(confirm(`Simulate subscription purchase ${sku}?`)){
-        const expiry = Date.now() + 30*24*60*60*1000;
-        await db.collection('users').doc(uid).update({ sub: sku, subExpiry: expiry, adFree: true });
-        const benefit = SUBSCRIPTIONS[sku];
-        if(benefit) await db.collection('users').doc(uid).update({ points: firebase.firestore.FieldValue.increment(benefit.pointsPerLogin) });
-        await addActivityFor(uid, `Purchased ${sku} (simulated)`);
-        await loadCurrentUserToUI(uid);
-        await renderSidebarLeaderboard();
-        showToast('Subscription active (simulated)','success',1600);
-      }
-    }catch(err){ console.error('purchase',err); showToast('Purchase failed','error'); }
-  }));
+      arr.sort((x,y)=> y.combined - x.combined);
+      if(arr.length === 0){ container.innerHTML = '<div class="small-muted">No couples yet.</div>'; return; }
+      arr.slice(0,100).forEach((it, idx) => {
+        const el = document.createElement('div'); el.className = 'lb-item';
+        el.innerHTML = `<div style="width:44px;font-weight:800">#${idx+1}</div>
+          <div style="display:flex;gap:8px;align-items:center">
+            <img class="avatar" data-src="${it.a.photoURL || 'https://ui-avatars.com/api/?name='+encodeURIComponent(it.a.name)}" src="${it.a.photoURL || 'https://ui-avatars.com/api/?name='+encodeURIComponent(it.a.name)}" />
+            <img class="avatar" data-src="${it.b.photoURL || 'https://ui-avatars.com/api/?name='+encodeURIComponent(it.b.name)}" src="${it.b.photoURL || 'https://ui-avatars.com/api/?name='+encodeURIComponent(it.b.name)}" />
+          </div>
+          <div style="flex:1">
+            <div style="font-weight:700">${escapeHtml(it.a.name)} & ${escapeHtml(it.b.name)}</div>
+            <div class="small-muted">${(it.combined).toLocaleString()} Twinity points</div>
+          </div>`;
+        container.appendChild(el);
+      });
 
-  // buy-points handlers
-  qAll('.buy-points').forEach(btn => btn.addEventListener('click', async e=>{
-    if(!auth.currentUser){ initAuthUI(); return; }
-    const pack = e.currentTarget.dataset.pack; const uid = auth.currentUser.uid;
-    const packInfo = POINT_PACKS[pack];
-    if(!packInfo) return showToast('Invalid pack','error');
-    try{
-      // native consumable hook if implemented later
-      if(window.AndroidBridge && typeof window.AndroidBridge.purchaseConsumable === 'function'){
-        // call native; native should call back to window.onNativeConsumableVerified(json)
-        window.AndroidBridge.purchaseConsumable(pack);
-        await addActivityFor(uid, `Requested native consumable ${pack}`);
-        showToast('Native purchase requested','info',1400);
-        return;
-      }
-      if(confirm(`Simulate purchase ${packInfo.label}?`)){
-        // Web simulation: award points immediately (in production, verify server-side)
-        await db.collection('users').doc(uid).update({ points: firebase.firestore.FieldValue.increment(packInfo.points) });
-        await addActivityFor(uid, `Bought points package ${packInfo.label}`);
-        await loadCurrentUserToUI(uid);
-        await renderSidebarLeaderboard();
-        showToast(`${packInfo.points.toLocaleString()} points added`, 'success', 1500);
-      }
-    }catch(err){ console.error('buy-points',err); showToast('Purchase failed','error'); }
-  }));
+      container.querySelectorAll('.avatar').forEach(img => {
+        img.addEventListener('click', e => {
+          const src = e.currentTarget.dataset.src || e.currentTarget.src;
+          if(!src) return;
+          $('imageModalImg').src = src;
+          $('imageModal').classList.add('show');
+        });
+      });
 
-  // Native purchase callback for subscriptions (existing)
-  window.onNativePurchaseVerified = async function(purchaseDataJson){
-    try{
-      const p = typeof purchaseDataJson === 'string' ? JSON.parse(purchaseDataJson) : purchaseDataJson;
-      if(!p || !p.userId) return;
-      const uid = p.userId, sku = p.sku, expiry = p.expiryTimeMillis || (Date.now() + 30*24*60*60*1000);
-      await db.collection('users').doc(uid).update({ sub: sku, subExpiry: expiry, adFree: true });
-      const benefit = SUBSCRIPTIONS[sku];
-      if(benefit) await db.collection('users').doc(uid).update({ points: firebase.firestore.FieldValue.increment(benefit.pointsPerLogin) });
-      await addActivityFor(uid, `Native verified purchase: ${sku}`);
-      if(auth.currentUser && auth.currentUser.uid === uid) await loadCurrentUserToUI(uid);
-      await renderSidebarLeaderboard();
-      showToast('Subscription activated (native)','success',1600);
-    }catch(err){ console.error('onNativePurchaseVerified',err); showToast('Native verify failed','error'); }
+    }catch(e){ console.error(e); $('globalLeaderboard').innerHTML = '<div class="small-muted">Unable to load</div>'; }
+  }
+  $('refreshGlobal').addEventListener('click', ()=> renderLeaderboard());
+
+  /* ---------------------------
+     Subscriptions & Packs
+     --------------------------- */
+  const SUBSCRIPTIONS = {
+    'sub_9': { price:9, pointsPerLogin:200, label:'₹9 / month — 200 pts/day · No ads' },
+    'sub_18': { price:18, pointsPerLogin:500, label:'₹18 / month — 500 pts/day · No ads' },
+    'sub_90': { price:90, pointsPerLogin:3000, label:'₹90 / month — 3,000 pts/day · No ads' },
+    'sub_180': { price:180, pointsPerLogin:9000, label:'₹180 / month — 9,000 pts/day · No ads' }
+  };
+  const POINT_PACKS = {
+    'points_10k': { price:49, points:10000, label:'₹49 — 10,000 pts' },
+    'points_20k': { price:99, points:20000, label:'₹99 — 20,000 pts' },
+    'points_50k': { price:199, points:50000, label:'₹199 — 50,000 pts' },
+    'points_100k': { price:349, points:100000, label:'₹349 — 100,000 pts' }
   };
 
-  // Native consumable callback (when native confirms a point pack)
-  window.onNativeConsumableVerified = async function(respJson){
-    try{
-      const p = typeof respJson === 'string' ? JSON.parse(respJson) : respJson;
-      if(!p || !p.userId) return;
-      const uid = p.userId, pack = p.pack;
-      const info = POINT_PACKS[pack];
-      if(!info) return;
-      // server/native should already have verified the purchase; we simply apply points locally if needed
-      await db.collection('users').doc(uid).update({ points: firebase.firestore.FieldValue.increment(info.points) });
-      await addActivityFor(uid, `Native consumable applied: ${pack}`);
-      if(auth.currentUser && auth.currentUser.uid === uid) await loadCurrentUserToUI(uid);
-      await renderSidebarLeaderboard();
-      showToast(`${info.points.toLocaleString()} points added (native)`, 'success', 1500);
-    }catch(err){ console.error('onNativeConsumableVerified',err); showToast('Consumable verify failed','error'); }
-  };
+  function renderSubscriptionsUI(){
+    const grid = $('subscriptionsGrid'); grid.innerHTML = '';
+    Object.keys(SUBSCRIPTIONS).forEach(sku => {
+      const info = SUBSCRIPTIONS[sku];
+      const card = document.createElement('div'); card.className='card';
+      card.innerHTML = `<div style="display:flex;justify-content:space-between;align-items:center">
+        <div>
+          <div class="price">${info.label.split('—')[0].trim()}</div>
+          <div class="small-muted">${info.label.split('—')[1]?.trim() || ''}</div>
+        </div>
+        <div>
+          <button class="btn purchase" data-sku="${sku}">Buy</button>
+        </div>
+      </div>`;
+      grid.appendChild(card);
+    });
+  }
+  function renderPointPacksUI(){
+    const grid = $('pointPacksGrid'); grid.innerHTML = '';
+    Object.keys(POINT_PACKS).forEach(key => {
+      const p = POINT_PACKS[key];
+      const card = document.createElement('div'); card.className='card';
+      card.innerHTML = `<div style="display:flex;justify-content:space-between;align-items:center">
+        <div>
+          <div class="price">${p.label.split('—')[0].trim()}</div>
+          <div class="small-muted">${p.label.split('—')[1]?.trim() || ''}</div>
+        </div>
+        <div>
+          <button class="btn buy-points" data-pack="${key}">Buy</button>
+        </div>
+      </div>`;
+      grid.appendChild(card);
+    });
+    setTimeout(()=>{ // attach listeners
+      Array.from(document.querySelectorAll('.purchase')).forEach(btn => btn.addEventListener('click', async e => {
+        if(!auth.currentUser){ $('loginModal').classList.add('show'); return; }
+        const sku = e.currentTarget.dataset.sku; const uid = auth.currentUser.uid;
+        try{
+          if(confirm('Simulate subscription purchase ' + sku + '?')){
+            const expiry = Date.now() + 30*24*60*60*1000;
+            await db.collection('users').doc(uid).update({ sub: sku, subExpiry: expiry, adFree: true });
+            const benefit = SUBSCRIPTIONS[sku];
+            if(benefit) await db.collection('users').doc(uid).update({ points: firebase.firestore.FieldValue.increment(benefit.pointsPerLogin) });
+            await db.collection('users').doc(uid).collection('activities').add({ text:'Purchased ' + sku + ' (simulated)', time: firebase.firestore.FieldValue.serverTimestamp() });
+            await loadCurrentUserToUI(uid); await renderLeaderboard(); showToast('Subscription active (simulated)');
+          }
+        }catch(err){ console.error(err); showToast('Purchase failed'); }
+      }));
+      Array.from(document.querySelectorAll('.buy-points')).forEach(btn => btn.addEventListener('click', async e => {
+        if(!auth.currentUser){ $('loginModal').classList.add('show'); return; }
+        const pack = e.currentTarget.dataset.pack; const uid = auth.currentUser.uid;
+        const info = POINT_PACKS[pack];
+        if(!info) return showToast('Invalid pack');
+        try{
+          if(confirm('Simulate purchase ' + info.label + '?')){
+            await db.collection('users').doc(uid).update({ points: firebase.firestore.FieldValue.increment(info.points) });
+            await db.collection('users').doc(uid).collection('activities').add({ text:'Bought points package ' + info.label, time: firebase.firestore.FieldValue.serverTimestamp() });
+            await loadCurrentUserToUI(uid); await renderLeaderboard(); showToast(info.points.toLocaleString() + ' points added');
+          }
+        }catch(err){ console.error(err); showToast('Purchase failed'); }
+      }));
+    },80);
+  }
+  function renderSubscriptionsGridNow(){ renderSubscriptionsUI(); renderPointPacksUI(); }
+  renderSubscriptionsGridNow();
 
-  // daily grant, logout, realtime updates etc (same as previous code)
-  async function grantDailyIfEligible(uid){
+  /* ---------------------------
+     adFlow & awardPointsServer
+     --------------------------- */
+  async function adFlow(opts={type:'interstitial'}) {
+    if(window.AndroidBridge && typeof window.AndroidBridge.showAd === 'function'){
+      try{ window.AndroidBridge.showAd(auth.currentUser ? auth.currentUser.uid : null); await new Promise(r=>setTimeout(r,1200)); }catch(e){ console.warn(e); }
+      return;
+    }
+    // web simulation
+    await new Promise(r => {
+      if(confirm(`Show ${opts.type} ad? (web simulation)`)) setTimeout(r,800);
+      else setTimeout(r,200);
+    });
+  }
+
+  async function awardPointsServer(points, extraMeta={}) {
+    if(!auth.currentUser) { showToast('Sign in to claim points'); return; }
+    try{
+      const idToken = await auth.currentUser.getIdToken();
+      const body = { userId: auth.currentUser.uid, points, meta: extraMeta };
+      const res = await fetch(FUNCTIONS_BASE + '/awardGamePoints', {
+        method: 'POST',
+        headers: { 'Content-Type':'application/json', 'Authorization':'Bearer ' + idToken },
+        body: JSON.stringify(body)
+      });
+      const j = await res.json();
+      if(res.ok && j.ok){
+        const p = await getUserProfile(auth.currentUser.uid);
+        $('points').innerText = p.points || 0;
+        renderLeaderboard();
+        showToast('+' + points + ' pts added');
+      } else {
+        await db.collection('users').doc(auth.currentUser.uid).update({ points: firebase.firestore.FieldValue.increment(points) });
+        await loadCurrentUserToUI(auth.currentUser.uid);
+        renderLeaderboard();
+        showToast('+' + points + ' pts (local)');
+      }
+    }catch(e){
+      console.warn('awardPointsServer failed', e);
+      try{ await db.collection('users').doc(auth.currentUser.uid).update({ points: firebase.firestore.FieldValue.increment(points) }); await loadCurrentUserToUI(auth.currentUser.uid); renderLeaderboard(); showToast('+' + points + ' pts (fallback)'); }catch(err){ console.error(err); showToast('Failed to award points'); }
+    }
+  }
+
+  /* ============================
+     GAMES: Bubble Shooter (improved), Match3, 2048
+     ============================ */
+
+  // UI refs
+  const openGamesBtn = $('openGamesBtn');
+  const gameModal = $('gameModal');
+  const gameTabsTop = Array.from(document.querySelectorAll('.game-tab'));
+  const closeGame = $('closeGame');
+  const pauseResume = $('pauseResume');
+  const hudScore = $('hudScore'), hudLevel = $('hudLevel'), gameScoreSmall = $('gameScoreSmall');
+  const shootBtn2 = $('shootBtn2'), resetBtn2 = $('resetBtn2'), claimLevelBtn = $('claimLevelBtn');
+  const nextPreviewEl = $('nextPreview');
+  const powerBar = $('powerBar'), powerFill = $('powerFill');
+
+  // open games
+  openGamesBtn && openGamesBtn.addEventListener('click', async () => {
+    if(!auth.currentUser){ $('loginModal').classList.add('show'); return; }
+    gameModal.classList.add('show');
+    activateGame('bubble');
+  });
+
+  // close
+  closeGame && closeGame.addEventListener('click', ()=> {
+    gameModal.classList.remove('show');
+    if(currentGame && currentGame.destroy) currentGame.destroy();
+  });
+
+  pauseResume && pauseResume.addEventListener('click', ()=> {
+    if(currentGame && currentGame.togglePause) { currentGame.togglePause(); pauseResume.innerText = pauseResume.innerText === '⏸' ? '▶' : '⏸'; }
+  });
+
+  // tabs always accessible; on tab click show ad then switch
+  gameTabsTop.forEach(t => t.addEventListener('click', async (ev) => {
+    const name = t.dataset.game;
+    if(!name) return;
+    // show interstitial ad on switch
+    await adFlow({ type:'interstitial' });
+    activateGame(name);
+  }));
+
+  // side controls mapping
+  shootBtn2 && shootBtn2.addEventListener('click', ()=> { if(currentGame && currentGame.shoot) currentGame.shoot(); });
+  resetBtn2 && resetBtn2.addEventListener('click', ()=> { if(currentGame && currentGame.reset) currentGame.reset(); });
+  claimLevelBtn && claimLevelBtn.addEventListener('click', async ()=> {
+    if(!auth.currentUser){ $('loginModal').classList.add('show'); return; }
+    if(currentGame && currentGame.claimLevel){
+      await adFlow({ type:'rewarded' });
+      await currentGame.claimLevel();
+    } else showToast('No claimable level right now');
+  });
+
+  // small helper to set active tab visually
+  function setActiveTab(name){
+    gameTabsTop.forEach(t => t.classList.toggle('active', t.dataset.game === name));
+  }
+
+  // game activation
+  let currentGame = null;
+  function activateGame(name){
+    setActiveTab(name);
+    if(currentGame && currentGame.destroy) currentGame.destroy();
+    if(name === 'bubble') currentGame = BubbleGame;
+    else if(name === 'match3') currentGame = Match3Game;
+    else currentGame = Game2048;
+    if(currentGame && currentGame.init) currentGame.init();
+  }
+
+  /* ----------------------------
+     Bubble Shooter (hold-to-charge + more bubbles)
+     ---------------------------- */
+  const BubbleGame = (function(){
+    // elements
+    const canvas = $('gameCanvas');
+    let ctx = null;
+    let DPR = Math.max(1, window.devicePixelRatio || 1);
+    let w = 1600, h = 900;
+
+    // grid config
+    const COLS = 10;
+    let ROWS = 9; // more bubbles
+    let R = 26;
+    const COLORS = ['#ff7aa2','#ffd36b','#6bf0d8','#9be6ff','#caa0ff','#88ffb8'];
+    const POP_MIN = 3;
+    const BASE_SPEED = 8;
+    const MAX_CHARGE = 1.8; // multiplier
+    // state
+    let grid = [];
+    let shooter = null;
+    let nextColor = null;
+    let aimAngle = Math.PI/2;
+    let running=false, paused=false;
+    let raf=0;
+    let score=0, level=1;
+
+    // charging
+    let charging=false, chargeStart=0, chargeLevel=0;
+
+    function resize(){
+      DPR = Math.max(1, window.devicePixelRatio || 1);
+      const rect = canvas.getBoundingClientRect();
+      // ensure canvas uses computed rect; when hidden sizes may be 0 so fallback
+      const rectW = Math.max(rect.width, 320);
+      const rectH = Math.max(rect.height, 420);
+      w = Math.floor(rectW * DPR);
+      h = Math.floor(rectH * DPR);
+      canvas.width = w;
+      canvas.height = h;
+      ctx = canvas.getContext('2d', { alpha:false });
+      ctx.setTransform(DPR,0,0,DPR,0,0);
+      computeR();
+    }
+    function computeR(){
+      const cw = canvas.width / DPR;
+      R = Math.max(12, Math.floor(cw / (COLS * 3.6)));
+    }
+
+    function initCanvas(){
+      if(!canvas) return;
+      resize();
+      window.addEventListener('resize', resize);
+      // pointer events for aim & charging
+      canvas.addEventListener('pointermove', onPointerMove);
+      canvas.addEventListener('pointerdown', onPointerDown);
+      canvas.addEventListener('pointerup', onPointerUp);
+      canvas.addEventListener('pointercancel', onPointerUp);
+      canvas.addEventListener('click', ()=> { /* neutral - we use pointer events */ });
+    }
+
+    function initGrid(){
+      ROWS = 7 + Math.floor(level/2) + 2; // make initial rows higher
+      grid = [];
+      for(let r=0;r<ROWS;r++){
+        grid[r] = [];
+        for(let c=0;c<COLS;c++){
+          // top rows populated, leave some gaps lower
+          const fillChance = (r < Math.min(ROWS, Math.floor(level/2)+5)) ? 0.95 : 0.35;
+          grid[r][c] = Math.random() < fillChance ? pick(COLORS) : null;
+        }
+      }
+    }
+    function pick(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
+
+    function spawnShooter(){
+      const cw = canvas.width / DPR, ch = canvas.height / DPR;
+      if(!nextColor) nextColor = pick(COLORS);
+      shooter = { x: cw/2, y: ch - (R + 18), r: R-2, color: nextColor, vx:0, vy:0, shooting:false };
+      nextColor = pick(COLORS);
+      updateNextPreview(nextColor);
+    }
+    function updateNextPreview(col){
+      if(nextPreviewEl) nextPreviewEl.style.background = col;
+    }
+
+    function onPointerMove(e){
+      if(!canvas) return;
+      const rect = canvas.getBoundingClientRect();
+      const mx = e.clientX - rect.left, my = e.clientY - rect.top;
+      updateAim(mx, my);
+      // if charging update power bar
+      if(charging){
+        const elapsed = (performance.now() - chargeStart) / 1000;
+        chargeLevel = Math.min(MAX_CHARGE, elapsed / 0.8); // full charge ~0.8s
+        updatePowerBar(chargeLevel / MAX_CHARGE);
+      }
+    }
+    function onPointerDown(e){
+      if(!shooter || paused) return;
+      // start charging
+      charging = true; chargeStart = performance.now(); chargeLevel = 0;
+      showPowerBar(true);
+    }
+    function onPointerUp(e){
+      if(!shooter) return;
+      if(charging){
+        // release - shoot with power
+        charging = false;
+        const multiplier = 1 + chargeLevel * (MAX_CHARGE-1);
+        performShoot(multiplier);
+        chargeLevel = 0;
+        showPowerBar(false);
+        return;
+      }
+      // if not charging and not shooting, treat as quick tap shoot
+      if(!shooter.shooting) performShoot(1.0);
+    }
+
+    function showPowerBar(visible){
+      if(!powerBar) return;
+      powerBar.style.display = visible ? 'flex' : 'none';
+      if(!visible) powerFill.style.width='0%';
+    }
+    function updatePowerBar(fraction){
+      if(!powerFill) return;
+      const pct = Math.round(Math.max(0, Math.min(1,fraction)) * 100);
+      powerFill.style.width = pct + '%';
+    }
+
+    function updateAim(mx, my){
+      const sx = shooter ? shooter.x : (canvas.width/DPR)/2;
+      const sy = shooter ? shooter.y : (canvas.height/DPR) - (R + 18);
+      aimAngle = Math.atan2(sy - my, mx - sx);
+    }
+
+    function performShoot(powerMultiplier){
+      if(!shooter || shooter.shooting || paused) return;
+      const speed = BASE_SPEED * (1 + (powerMultiplier*0.9)); // base speed * charge
+      shooter.vx = Math.cos(aimAngle) * speed;
+      shooter.vy = -Math.sin(aimAngle) * speed;
+      shooter.shooting = true;
+    }
+
+    function step(){
+      if(paused) return;
+      // move shooter if shooting
+      if(shooter && shooter.shooting){
+        shooter.x += shooter.vx;
+        shooter.y += shooter.vy;
+        // wall bounce
+        const cw = canvas.width / DPR;
+        if(shooter.x <= R){ shooter.x = R; shooter.vx = Math.abs(shooter.vx); }
+        if(shooter.x >= cw - R){ shooter.x = cw - R; shooter.vx = -Math.abs(shooter.vx); }
+        // top collision
+        if(shooter.y <= R + 24){
+          placeBubbleAt(shooter.x, shooter.y, shooter.color);
+          shooter.shooting=false; spawnShooter();
+          return;
+        }
+        // check hit any bubble
+        let collided=false;
+        for(let r=0;r<ROWS && !collided;r++){
+          for(let c=0;c<COLS && !collided;c++){
+            if(grid[r] && grid[r][c]){
+              const {x,y} = gridToPixel(c,r);
+              const dx = shooter.x - x, dy = shooter.y - y;
+              if(Math.hypot(dx,dy) <= R*1.5) collided = true;
+            }
+          }
+        }
+        if(collided){
+          placeBubbleAt(shooter.x, shooter.y, shooter.color);
+          shooter.shooting=false; spawnShooter();
+          return;
+        }
+      }
+    }
+
+    function gridToPixel(c,r){
+      const x = c * R*2 + ((r%2) ? R : 0) + R + 12;
+      const y = r * (R*1.73) + R + 28;
+      return { x, y };
+    }
+
+    function draw(){
+      if(!ctx) return;
+      const W = canvas.width / DPR, H = canvas.height / DPR;
+      const g = ctx.createLinearGradient(0,0,0,H);
+      g.addColorStop(0,'#071428'); g.addColorStop(1,'#041426');
+      ctx.fillStyle = g; ctx.fillRect(0,0,W,H);
+
+      // draw grid bubbles
+      for(let r=0;r<ROWS;r++){
+        for(let c=0;c<COLS;c++){
+          const col = grid[r][c];
+          if(col) {
+            const {x,y} = gridToPixel(c,r);
+            drawBubble(x,y,R-1,col);
+          }
+        }
+      }
+
+      // draw shooter (and aim)
+      if(shooter){
+        // draw aim line when not shooting
+        if(!shooter.shooting){
+          ctx.save();
+          ctx.strokeStyle = 'rgba(255,255,255,0.12)';
+          ctx.setLineDash([6,6]);
+          ctx.lineWidth = 2;
+          ctx.beginPath();
+          ctx.moveTo(shooter.x, shooter.y);
+          // draw a short projection with bounces
+          let px = shooter.x, py = shooter.y;
+          let vx = Math.cos(aimAngle) * 6, vy = -Math.sin(aimAngle) * 6;
+          for(let i=0;i<90;i++){
+            px += vx; py += vy;
+            if(px <= R || px >= W - R) { vx = -vx; }
+            if(py <= R + 24) { ctx.lineTo(px,py); break; }
+            // approximate collision detection
+            let collided=false;
+            for(let rr=0; rr<ROWS && !collided; rr++){
+              for(let cc=0; cc<COLS && !collided; cc++){
+                if(grid[rr][cc]){
+                  const {x,y} = gridToPixel(cc,rr);
+                  if(Math.hypot(px-x,py-y) < R*1.2){ collided=true; ctx.lineTo(px,py); break; }
+                }
+              }
+            }
+            if(collided) break;
+          }
+          ctx.stroke(); ctx.restore();
+        }
+        // draw charging aura if charging
+        if(charging){
+          ctx.beginPath(); ctx.fillStyle = 'rgba(255,95,168,0.08)'; ctx.arc(shooter.x, shooter.y, shooter.r + 10 * (0.4 + (chargeLevel||0)), 0, Math.PI*2); ctx.fill();
+        }
+        // draw bubble
+        drawBubble(shooter.x, shooter.y, shooter.r, shooter.color);
+      }
+    }
+
+    function drawBubble(x,y,r,color){
+      const g = ctx.createRadialGradient(x - r*0.2, y - r*0.4, r*0.06, x, y, r);
+      g.addColorStop(0,'#ffffff'); g.addColorStop(0.04,color); g.addColorStop(1,color);
+      ctx.beginPath(); ctx.fillStyle = g; ctx.arc(x,y,r,0,Math.PI*2); ctx.fill();
+      ctx.lineWidth = 1; ctx.strokeStyle = 'rgba(0,0,0,0.18)'; ctx.stroke();
+      ctx.beginPath(); ctx.globalAlpha = 0.14; ctx.fillStyle = '#fff'; ctx.ellipse(x - r*0.28, y - r*0.45, r*0.6, r*0.45, -0.45, 0, Math.PI*2); ctx.fill(); ctx.globalAlpha = 1;
+    }
+
+    function placeBubbleAt(px, py, color){
+      // find nearest grid cell
+      let best = null, bestD = 1e9;
+      for(let r=0;r<ROWS;r++){
+        for(let c=0;c<COLS;c++){
+          const {x,y} = gridToPixel(c,r);
+          const d = Math.hypot(px-x, py-y);
+          if(d < bestD){ bestD = d; best = {r,c}; }
+        }
+      }
+      if(!best) return;
+      let {r,c} = best;
+      if(grid[r][c]){
+        // attempt neighbors
+        const neigh = [[0,1],[0,-1],[1,0],[-1,0],[1,1],[1,-1]];
+        let placed=false;
+        for(const d of neigh){
+          const nr=r+d[0], nc=c+d[1];
+          if(nr>=0 && nr<ROWS && nc>=0 && nc<COLS && !grid[nr][nc]){ grid[nr][nc] = color; placed=true; break; }
+        }
+        if(!placed){
+          for(let cc=0;cc<COLS;cc++) if(!grid[0][cc]){ grid[0][cc] = color; break; }
+        }
+      } else {
+        grid[r][c] = color;
+      }
+
+      // pop clusters
+      const cluster = floodFill(r,c);
+      if(cluster.length >= POP_MIN){
+        for(const p of cluster) grid[p.r][p.c] = null;
+        score += cluster.length * 12;
+      }
+      // remove floating
+      removeFloating();
+      updateHUD();
+      // check clear
+      if(isCleared()) {
+        levelComplete();
+      }
+    }
+
+    function floodFill(sr, sc){
+      const target = grid[sr] ? grid[sr][sc] : null;
+      if(!target) return [];
+      const stack = [[sr,sc]], seen={}, result=[];
+      while(stack.length){
+        const [r,c] = stack.pop(); const key = r+'_'+c;
+        if(seen[key]) continue; seen[key]=1;
+        if(grid[r] && grid[r][c] === target){
+          result.push({r,c});
+          const neigh = [[0,1],[0,-1],[1,0],[-1,0],[1,1],[1,-1]];
+          for(const d of neigh){
+            const nr=r+d[0], nc=c+d[1];
+            if(nr>=0 && nr<ROWS && nc>=0 && nc<COLS) stack.push([nr,nc]);
+          }
+        }
+      }
+      return result;
+    }
+
+    function removeFloating(){
+      const visited = {}; const stack=[];
+      if(grid[0]) for(let c=0;c<COLS;c++) if(grid[0][c]) stack.push([0,c]);
+      while(stack.length){
+        const [r,c] = stack.pop(); const key = r+'_'+c; if(visited[key]) continue; visited[key]=1;
+        const neigh = [[0,1],[0,-1],[1,0],[-1,0],[1,1],[1,-1]];
+        for(const d of neigh){
+          const nr=r+d[0], nc=c+d[1];
+          if(nr>=0 && nr<ROWS && nc>=0 && nc<COLS && grid[nr][nc] && !visited[nr+'_'+nc]) stack.push([nr,nc]);
+        }
+      }
+      for(let r=0;r<ROWS;r++){
+        for(let c=0;c<COLS;c++){
+          if(grid[r][c] && !visited[r+'_'+c]){
+            grid[r][c] = null;
+            score += 6;
+          }
+        }
+      }
+    }
+
+    function isCleared(){
+      for(let r=0;r<ROWS;r++) for(let c=0;c<COLS;c++) if(grid[r][c]) return false;
+      return true;
+    }
+
+    async function levelComplete(){
+      const award = 50 + (level-1)*12;
+      await awardPointsServer(award, { game:'bubble', level });
+      level++;
+      // push a row to top to increase difficulty
+      const newRow = [];
+      for(let c=0;c<COLS;c++) newRow[c] = pick(COLORS);
+      grid.unshift(newRow);
+      ROWS = grid.length;
+      showToast('Level cleared • +' + award + ' pts');
+      updateHUD();
+    }
+
+    function updateHUD(){
+      if(hudScore) hudScore.innerText = score;
+      if(hudLevel) hudLevel.innerText = level;
+      if(gameScoreSmall) gameScoreSmall.innerText = 'Score: ' + score;
+    }
+
+    function loop(){
+      if(!running) return;
+      step();
+      draw();
+      raf = requestAnimationFrame(loop);
+    }
+
+    function reset(){
+      score = 0; level = 1;
+      initGrid();
+      spawnShooter();
+      updateHUD();
+      showToast('Bubble shooter reset');
+    }
+
+    function destroy(){
+      running=false; paused=false;
+      cancelAnimationFrame(raf);
+      // remove listeners we added
+      try{
+        canvas.removeEventListener('pointermove', onPointerMove);
+        canvas.removeEventListener('pointerdown', onPointerDown);
+        canvas.removeEventListener('pointerup', onPointerUp);
+        canvas.removeEventListener('pointercancel', onPointerUp);
+        window.removeEventListener('resize', resize);
+      }catch(e){}
+    }
+
+    // public API
+    return {
+      init: function(){
+        if(running) return;
+        initCanvas();
+        initGrid();
+        spawnShooter();
+        running = true;
+        loop();
+      },
+      destroy,
+      togglePause: function(){ paused = !paused; showToast(paused ? 'Paused' : 'Resumed'); },
+      shoot: function(){ performShoot(1.0); },
+      reset,
+      claimLevel: async function(){ const award = Math.max(50, Math.floor(score/8)); await awardPointsServer(award, { game:'bubble', level }); showToast('Claimed +' + award + ' pts'); }
+    };
+  })();
+
+  /* ---------------------------------------
+     Match3 & 2048 (kept simple & usable)
+     --------------------------------------- */
+
+  const Match3Game = (function(){
+    const boardEl = document.createElement('div');
+    boardEl.id = 'm3Board';
+    const gameWrap = document.createElement('div');
+    // We'll append this board to the canvas area when user switches — simple approach avoids reworking DOM structure
+    let size=6, grid=[], colors=['#ff7aa2','#ffd36b','#6bf0d8','#9be6ff','#caa0ff','#88ffb8'];
+    let score=0, level=1;
+
+    function pick(a){ return a[Math.floor(Math.random()*a.length)]; }
+    function makeGrid(){ grid = Array.from({length:size}, ()=> Array.from({length:size}, ()=> pick(colors))); }
+    function render(){
+      // place into canvas area: replace inner content with board
+      const wrapper = document.querySelector('.game-canvas-wrap');
+      if(!wrapper) return;
+      wrapper.innerHTML = '';
+      const board = document.createElement('div');
+      board.style.display='grid'; board.style.gridTemplateColumns = `repeat(${size},56px)`; board.style.justifyContent='center'; board.style.alignItems='center'; board.style.padding='18px';
+      for(let r=0;r<size;r++){
+        for(let c=0;c<size;c++){
+          const t = document.createElement('div');
+          t.className='match3-tile';
+          t.style.background = grid[r][c];
+          t.dataset.r = r; t.dataset.c = c;
+          t.style.width='56px'; t.style.height='56px';
+          t.style.borderRadius='8px'; t.style.margin='6px';
+          t.addEventListener('click', onClick);
+          board.appendChild(t);
+        }
+      }
+      wrapper.appendChild(board);
+    }
+    let first=null, anim=false;
+    function onClick(e){
+      if(anim) return;
+      const r=+e.currentTarget.dataset.r, c=+e.currentTarget.dataset.c;
+      if(!first){ first={r,c,el:e.currentTarget}; e.currentTarget.style.transform='scale(1.06)'; return; }
+      first.el.style.transform='';
+      const fr=first.r, fc=first.c;
+      if(Math.abs(fr-r)+Math.abs(fc-c)===1){
+        swap(fr,fc,r,c);
+        if(!hasMatch()){
+          swap(fr,fc,r,c); showToast('No match');
+        } else processMatches();
+      }
+      first=null;
+    }
+    function swap(r1,c1,r2,c2){ const t = grid[r1][c1]; grid[r1][c1]=grid[r2][c2]; grid[r2][c2]=t; render(); }
+    function hasMatch(){ for(let r=0;r<size;r++) for(let c=0;c<size;c++){ const v=grid[r][c]; if(!v) continue; if(c+2<size && grid[r][c+1]===v && grid[r][c+2]===v) return true; if(r+2<size && grid[r+1][c]===v && grid[r+2][c]===v) return true; } return false; }
+    function findMatches(){ const rem = Array.from({length:size}, ()=> Array(size).fill(false)); for(let r=0;r<size;r++) for(let c=0;c<size;c++){ const v=grid[r][c]; if(!v) continue; if(c+2<size && grid[r][c+1]===v && grid[r][c+2]===v){ let cc=c; while(cc<size && grid[r][cc]===v){ rem[r][cc]=true; cc++; } } if(r+2<size && grid[r+1][c]===v && grid[r+2][c]===v){ let rr=r; while(rr<size && grid[rr][c]===v){ rem[rr][c]=true; rr++; } } } return rem; }
+    function collapse(){ for(let c=0;c<size;c++){ let write=size-1; for(let r=size-1;r>=0;r--){ if(grid[r][c]){ grid[write][c]=grid[r][c]; write--; } } for(let r=write;r>=0;r--) grid[r][c]=pick(colors); } }
+    function processMatches(){ anim=true; const rem=findMatches(); let any=false, cnt=0; for(let r=0;r<size;r++) for(let c=0;c<size;c++) if(rem[r][c]){ any=true; grid[r][c]=null; cnt++; } if(!any){ anim=false; if(score >= level*100) levelComplete(); return; } score += cnt * 6; render(); setTimeout(()=>{ collapse(); render(); setTimeout(()=>{ anim=false; processMatches(); }, 220); }, 180); }
+    async function levelComplete(){ const award=40; showToast('Match-3 cleared • +' + award + ' pts'); await awardPointsServer(award, { game:'match3', level }); level++; score=0; makeGrid(); render(); }
+    return {
+      init: function(){ makeGrid(); score=0; level=1; const wrap = document.querySelector('.game-canvas-wrap'); if(wrap) wrap.innerHTML=''; render(); },
+      destroy: function(){ /* nothing */ },
+      reset: function(){ makeGrid(); score=0; level=1; render(); showToast('Match-3 reset'); },
+      claimLevel: async function(){ await levelComplete(); }
+    };
+  })();
+
+  const Game2048 = (function(){
+    const wrapperSelector = '.game-canvas-wrap';
+    let size=4, grid=[], score=0;
+    function setEmpty(){ grid = Array.from({length:size}, ()=> Array(size).fill(0)); }
+    function addRandom(){ const empties=[]; for(let r=0;r<size;r++) for(let c=0;c<size;c++) if(grid[r][c]===0) empties.push([r,c]); if(empties.length===0) return; const [r,c]=empties[Math.floor(Math.random()*empties.length)]; grid[r][c] = Math.random() < 0.9 ? 2 : 4; }
+    function render(){ const wrap = document.querySelector(wrapperSelector); if(!wrap) return; wrap.innerHTML=''; const board = document.createElement('div'); board.style.display='grid'; board.style.gridTemplateColumns = `repeat(${size}, auto)`; board.style.justifyContent='center'; board.style.alignItems='center'; board.style.padding='18px'; for(let r=0;r<size;r++) for(let c=0;c<size;c++){ const v=grid[r][c]; const t=document.createElement('div'); t.className='tile-2048'; t.style.margin='6px'; t.style.width='72px'; t.style.height='72px'; t.style.display='flex'; t.style.alignItems='center'; t.style.justifyContent='center'; t.style.borderRadius='8px'; t.style.fontWeight='800'; t.style.fontSize='20px'; t.style.background = v ? '#1f3a4a' : 'rgba(255,255,255,0.02)'; t.innerText = v? v : ''; board.appendChild(t); } wrap.appendChild(board); }
+    function init(){ setEmpty(); addRandom(); addRandom(); render(); }
+    function transpose(m){ return m[0].map((_,i)=> m.map(row=> row[i])); }
+    function compress(row){ const out = row.filter(x=>x!==0); for(let i=0;i<out.length-1;i++) if(out[i]===out[i+1]){ out[i]*=2; score+=out[i]; out.splice(i+1,1); } while(out.length<size) out.push(0); return out; }
+    function moveLeft(){ let changed=false; for(let r=0;r<size;r++){ const old = grid[r].slice(); grid[r] = compress(grid[r]); if(old.join(',') !== grid[r].join(',')) changed=true; } if(changed) addRandom(); render(); return changed; }
+    function moveRight(){ grid = grid.map(row=> row.slice().reverse()); const ok = moveLeft(); grid = grid.map(row=> row.slice().reverse()); return ok; }
+    function moveUp(){ grid = transpose(grid); const ok = moveLeft(); grid = transpose(grid); return ok; }
+    function moveDown(){ grid = transpose(grid); const ok = moveRight(); grid = transpose(grid); return ok; }
+    function anyMoves(){ for(let r=0;r<size;r++) for(let c=0;c<size;c++) if(grid[r][c]===0) return true; for(let r=0;r<size;r++) for(let c=0;c<size-1;c++) if(grid[r][c]===grid[r][c+1]) return true; for(let c=0;c<size;c++) for(let r=0;r<size-1;r++) if(grid[r][c]===grid[r+1][c]) return true; return false; }
+    function handleMove(dir){ if(dir==='left') moveLeft(); if(dir==='right') moveRight(); if(dir==='up') moveUp(); if(dir==='down') moveDown(); if(!anyMoves()) showToast('No moves left'); }
+    // keyboard
+    window.addEventListener('keydown', (e)=> {
+      if(!document.querySelector(wrapperSelector)) return;
+      if(e.key === 'ArrowLeft') handleMove('left');
+      if(e.key === 'ArrowRight') handleMove('right');
+      if(e.key === 'ArrowUp') handleMove('up');
+      if(e.key === 'ArrowDown') handleMove('down');
+    });
+    // touch swipe
+    let sx=0, sy=0;
+    document.addEventListener('touchstart', e=> { sx=e.touches[0].clientX; sy=e.touches[0].clientY; }, {passive:true});
+    document.addEventListener('touchend', e=> {
+      const dx = e.changedTouches[0].clientX - sx, dy = e.changedTouches[0].clientY - sy;
+      if(Math.abs(dx) > Math.abs(dy)){ if(dx>30) handleMove('right'); else if(dx<-30) handleMove('left'); }
+      else { if(dy>30) handleMove('down'); else if(dy<-30) handleMove('up'); }
+    }, {passive:true});
+    return {
+      init(){ init(); },
+      destroy(){},
+      reset(){ init(); showToast('2048 reset'); },
+      claim: async ()=> { const award=30; await awardPointsServer(award, { game:'2048' }); showToast('Claimed +' + award + ' pts'); }
+    };
+  })();
+
+  // Wiring avatar upload
+  $('changePhotoBtn') && $('changePhotoBtn').addEventListener('click', ()=> { if(!auth.currentUser) { $('loginModal').classList.add('show'); return; } $('avatarFile').click(); });
+  $('avatarFile') && $('avatarFile').addEventListener('change', async e => {
+    const f = e.target.files && e.target.files[0]; if(!f) return;
+    if(!auth.currentUser) return showToast('Sign in first');
+    const uid = auth.currentUser.uid;
+    try{
+      showToast('Uploading...');
+      const ref = storage.ref().child('avatars/'+uid+'/'+Date.now()+'_'+f.name.replace(/[^a-z0-9.\-]/gi,'_'));
+      const snap = await ref.put(f);
+      const url = await snap.ref.getDownloadURL();
+      await auth.currentUser.updateProfile({ photoURL: url });
+      await db.collection('users').doc(uid).update({ photoURL: url });
+      await loadCurrentUserToUI(uid);
+      showToast('Photo updated');
+    }catch(err){ console.error(err); showToast('Upload failed'); }
+  });
+
+  // image modal close
+  $('closeImageModal') && $('closeImageModal').addEventListener('click', ()=> $('imageModal').classList.remove('show'));
+  $('imageModal') && $('imageModal').addEventListener('click', (e)=> { if(e.target === $('imageModal')) $('imageModal').classList.remove('show'); });
+
+  // partner / connect / watch ad handlers (same as before)
+  $('createPartner') && $('createPartner').addEventListener('click', async ()=>{
+    if(!auth.currentUser){ $('loginModal').classList.add('show'); return; }
+    const uid = auth.currentUser.uid;
     try{
       const ref = db.collection('users').doc(uid);
-      const snap = await ref.get();
-      const data = snap.exists ? snap.data() : {};
-      if(!data.sub) return;
-      const sub = SUBSCRIPTIONS[data.sub];
-      if(!sub) return;
-      if(data.subExpiry && Date.now() > data.subExpiry){
-        await ref.update({ sub: firebase.firestore.FieldValue.delete, adFree: false });
-        await addActivityFor(uid, 'Subscription expired');
-        showToast('Subscription expired','info',2000);
-        return;
+      const snap = await ref.get(); const data = snap.exists ? snap.data() : {};
+      if(!data.partnerCode){ const code = uid.slice(0,6).toUpperCase(); await ref.update({ partnerCode: code }); showToast('Partner code: '+code); } else showToast('Partner code: ' + data.partnerCode);
+    }catch(e){ console.error(e); showToast('Could not create code'); }
+  });
+
+  $('connectPartner') && $('connectPartner').addEventListener('click', ()=> { if(!auth.currentUser){ $('loginModal').classList.add('show'); return; } $('connectModal').classList.add('show'); });
+  $('closeConnect') && $('closeConnect').addEventListener('click', ()=> $('connectModal').classList.remove('show'));
+
+  $('doConnect') && $('doConnect').addEventListener('click', async ()=> {
+    if(!auth.currentUser){ $('loginModal').classList.add('show'); return; }
+    const code = ($('partnerCodeInput').value||'').trim().toUpperCase(); if(!code) return showToast('Enter partner code');
+    try{
+      const usersSnap = await db.collection('users').where('partnerCode','==',code).get();
+      if(usersSnap.empty) return showToast('No user found with that code');
+      const partnerId = usersSnap.docs[0].id; const myUid = auth.currentUser.uid;
+      if(partnerId === myUid) return showToast('This is your code');
+      const checkA = await db.collection('couples').where('memberA','==',myUid).get();
+      const checkB = await db.collection('couples').where('memberB','==',myUid).get();
+      if(!checkA.empty || !checkB.empty) return showToast('You are already connected');
+      const checkPA = await db.collection('couples').where('memberA','==',partnerId).get();
+      const checkPB = await db.collection('couples').where('memberB','==',partnerId).get();
+      if(!checkPA.empty || !checkPB.empty) return showToast('Partner already connected');
+      const rsVal = ($('relationshipStartInput').value) || null;
+      const payload = { memberA: myUid, memberB: partnerId, createdAt: firebase.firestore.FieldValue.serverTimestamp() };
+      if(rsVal) payload.relationshipStart = new Date(rsVal + 'T00:00:00');
+      await db.collection('couples').add(payload);
+      await db.collection('users').doc(myUid).collection('activities').add({ text:'Connected with ' + partnerId, time: firebase.firestore.FieldValue.serverTimestamp() });
+      await db.collection('users').doc(partnerId).collection('activities').add({ text:'Connected with ' + myUid, time: firebase.firestore.FieldValue.serverTimestamp() });
+      showToast('Connected!');
+      $('connectModal').classList.remove('show');
+      renderLeaderboard();
+    }catch(e){ console.error(e); showToast('Could not connect'); }
+  });
+
+  $('watchAd') && $('watchAd').addEventListener('click', async ()=> {
+    if(!auth.currentUser){ $('loginModal').classList.add('show'); return; }
+    if(!confirm('Simulate watching an ad to earn +100 points?')) return;
+    try{
+      const idToken = await auth.currentUser.getIdToken();
+      const res = await fetch(FUNCTIONS_BASE + '/applyAdReward', { method:'POST', headers:{ 'Content-Type':'application/json', 'Authorization':'Bearer '+idToken }, body: JSON.stringify({ userId: auth.currentUser.uid })});
+      const j = await res.json();
+      if(res.ok && j.ok){ showToast('+100 Twinity points'); const p = await getUserProfile(auth.currentUser.uid); $('points').innerText = p.points || 0; renderLeaderboard(); }
+      else {
+        await db.collection('users').doc(auth.currentUser.uid).update({ points: firebase.firestore.FieldValue.increment(100) });
+        await loadCurrentUserToUI(auth.currentUser.uid);
+        renderLeaderboard();
+        showToast('+100 Twinity points (local)');
       }
-      const last = data.lastDailyClaim || null;
-      const nowk = new Date(); const key = `${nowk.getFullYear()}-${nowk.getMonth()+1}-${nowk.getDate()}`;
-      if(last === key) return;
-      await ref.update({ points: firebase.firestore.FieldValue.increment(sub.pointsPerLogin), lastDailyClaim: key });
-      await addActivityFor(uid, `Daily bonus: +${sub.pointsPerLogin}`);
-      showToast(`Daily +${sub.pointsPerLogin}`,'success',1600);
-    }catch(err){ console.error('grantDailyIfEligible',err); }
-  }
+    }catch(e){ console.error(e); showToast('Reward failed'); }
+  });
 
-  $('logoutBtn').addEventListener('click', async ()=>{ if(confirm('Logout?')){ await auth.signOut(); location.reload(); } });
+  // login / email
+  $('emailSignIn') && $('emailSignIn').addEventListener('click', async ()=> {
+    const em = $('loginEmail').value.trim(), pw = $('loginPass').value;
+    if(!em || !pw) return showToast('Enter email & password');
+    try{ await auth.signInWithEmailAndPassword(em, pw); $('loginModal').classList.remove('show'); showToast('Signed in'); }catch(e){ showToast(e.message || 'Sign-in failed'); }
+  });
+  $('emailSignUp') && $('emailSignUp').addEventListener('click', async ()=> {
+    const em = $('loginEmail').value.trim(), pw = $('loginPass').value;
+    if(!em || !pw) return showToast('Enter email & password');
+    try{ const cred = await auth.createUserWithEmailAndPassword(em, pw); await createOrUpdateUserDoc(cred.user); $('loginModal').classList.remove('show'); showToast('Account created'); }catch(e){ showToast(e.message || 'Sign up failed'); }
+  });
 
-  // realtime couples updates
-  db.collection('couples').onSnapshot(()=> { renderSidebarLeaderboard(); if(document.querySelector('.nav-btn.active')?.dataset.view === 'leaderboardView') renderGlobalLeaderboard(); });
-
-  /**********************
-    ENCRYPTED CHAT + RELATIONSHIP TIMER (unchanged)
-  **********************/
-
-  // base64 helpers
+  // Chat crypto helpers (kept)
   function bytesToBase64(b){ return btoa(String.fromCharCode(...new Uint8Array(b))); }
   function base64ToBytes(b64){ const bin = atob(b64); const arr = new Uint8Array(bin.length); for(let i=0;i<bin.length;i++) arr[i] = bin.charCodeAt(i); return arr.buffer; }
-
-  async function updateRelationshipTimer(uid){
-    try{
-      const snapA = await db.collection('couples').where('memberA','==',uid).get();
-      let coupleDoc = null;
-      if(!snapA.empty) coupleDoc = snapA.docs[0];
-      else {
-        const snapB = await db.collection('couples').where('memberB','==',uid).get();
-        if(!snapB.empty) coupleDoc = snapB.docs[0];
-      }
-      if(!coupleDoc) {
-        const el = $('chatStatus'); if(el) el.innerText = 'You are not connected to a partner yet';
-        return null;
-      }
-      const coupleData = coupleDoc.data();
-      const createdAt = coupleData.createdAt && coupleData.createdAt.toDate ? coupleData.createdAt.toDate() : (coupleData.createdAt ? new Date(coupleData.createdAt) : new Date());
-      const now = new Date();
-      const days = Math.floor((now - createdAt)/ (24*60*60*1000));
-      const myCoupleEl = $('myCouple');
-      if(myCoupleEl){
-        const textParts = myCoupleEl.innerText.split('·')[0].trim();
-        myCoupleEl.innerText = `${textParts} · ${days} day${days===1?'':'s'}`;
-      }
-      const chatStatusEl = $('chatStatus'); if(chatStatusEl) chatStatusEl.innerText = `In relationship for ${days} day${days===1?'':'s'}`;
-      return { coupleId: coupleDoc.id, partnerId: (coupleData.memberA === uid ? coupleData.memberB : coupleData.memberA), createdAt };
-    }catch(err){ console.error('updateRelationshipTimer',err); return null; }
-  }
-
-  const PRIVATE_KEY_STORAGE_KEY = (uid) => `twinity_privKey_${uid}`;
-
-  async function ensureKeyPairForCurrentUser(){
-    const user = auth.currentUser; if(!user) return;
-    const uid = user.uid;
-    if(localStorage.getItem(PRIVATE_KEY_STORAGE_KEY(uid))) return;
-    try{
-      const kp = await crypto.subtle.generateKey(
-        { name:"RSA-OAEP", modulusLength: 2048, publicExponent: new Uint8Array([1,0,1]), hash:"SHA-256" },
-        true,
-        ["encrypt","decrypt"]
-      );
-      const pubJwk = await crypto.subtle.exportKey("jwk", kp.publicKey);
-      const privJwk = await crypto.subtle.exportKey("jwk", kp.privateKey);
-      await db.collection('users').doc(uid).set({ publicKey: pubJwk }, { merge:true });
-      localStorage.setItem(PRIVATE_KEY_STORAGE_KEY(uid), JSON.stringify(privJwk));
-      showToast('Encryption keys generated & public key uploaded','success',2200);
-    }catch(err){ console.error('ensureKeyPair',err); showToast('Could not generate keys','error'); }
-  }
-
+  const PRIVATE_KEY_STORAGE_KEY = uid => `twinity_privKey_${uid}`;
+  async function ensureKeyPairForCurrentUser(){ const user = auth.currentUser; if(!user) return; const uid = user.uid; if(localStorage.getItem(PRIVATE_KEY_STORAGE_KEY(uid))) return; try{ const kp = await crypto.subtle.generateKey({ name:"RSA-OAEP", modulusLength:2048, publicExponent:new Uint8Array([1,0,1]), hash:"SHA-256" }, true, ["encrypt","decrypt"]); const pubJwk = await crypto.subtle.exportKey("jwk", kp.publicKey); const privJwk = await crypto.subtle.exportKey("jwk", kp.privateKey); await db.collection('users').doc(uid).set({ publicKey: pubJwk }, { merge:true }); localStorage.setItem(PRIVATE_KEY_STORAGE_KEY(uid), JSON.stringify(privJwk)); showToast('Encryption keys created'); }catch(e){ console.error(e); showToast('Key gen failed'); } }
   async function importPublicKeyFromJwk(jwk){ return await crypto.subtle.importKey("jwk", jwk, { name:"RSA-OAEP", hash:"SHA-256" }, false, ["encrypt"]); }
   async function importPrivateKeyFromJwk(jwk){ return await crypto.subtle.importKey("jwk", jwk, { name:"RSA-OAEP", hash:"SHA-256" }, false, ["decrypt"]); }
-
-  async function encryptForJwkPublic(recipientJwk, plaintext){
-    const pubKey = await importPublicKeyFromJwk(recipientJwk);
-    const enc = new TextEncoder().encode(plaintext);
-    const cipher = await crypto.subtle.encrypt({ name:"RSA-OAEP" }, pubKey, enc);
-    return bytesToBase64(cipher);
-  }
-
-  async function decryptMessageBase64(uid, base64Cipher){
-    try{
-      const privRaw = localStorage.getItem(PRIVATE_KEY_STORAGE_KEY(uid));
-      if(!privRaw) throw new Error('Private key not found locally');
-      const privJwk = JSON.parse(privRaw);
-      const privKey = await importPrivateKeyFromJwk(privJwk);
-      const cipherBuf = base64ToBytes(base64Cipher);
-      const plainBuf = await crypto.subtle.decrypt({ name:"RSA-OAEP" }, privKey, cipherBuf);
-      const txt = new TextDecoder().decode(plainBuf);
-      return txt;
-    }catch(err){ console.warn('decrypt error', err); return null; }
-  }
+  async function encryptForJwkPublic(recipientJwk, plaintext){ const pub = await importPublicKeyFromJwk(recipientJwk); const enc = new TextEncoder().encode(plaintext); const cipher = await crypto.subtle.encrypt({ name:"RSA-OAEP" }, pub, enc); return bytesToBase64(cipher); }
+  async function decryptMessageBase64(uid, base64Cipher){ try{ const privRaw = localStorage.getItem(PRIVATE_KEY_STORAGE_KEY(uid)); if(!privRaw) throw new Error('No private key'); const privJwk = JSON.parse(privRaw); const priv = await importPrivateKeyFromJwk(privJwk); const cipherBuf = base64ToBytes(base64Cipher); const plainBuf = await crypto.subtle.decrypt({ name:"RSA-OAEP" }, priv, cipherBuf); return new TextDecoder().decode(plainBuf); } catch(e){ console.warn('decrypt', e); return null; } }
 
   let chatUnsub = null;
-  async function openChatForCurrentUser(){
-    const user = auth.currentUser; if(!user) { showToast('Sign in to chat','error'); return; }
+  async function openChat(){
+    if(!auth.currentUser){ showToast('Sign in first'); return; }
     await ensureKeyPairForCurrentUser();
-    const info = await updateRelationshipTimer(user.uid);
-    if(!info){ showToast('No couple found — invite partner','info'); return; }
-    const coupleId = info.coupleId;
-    const partnerId = info.partnerId;
-    const partnerDoc = await db.collection('users').doc(partnerId).get();
-    const partnerData = partnerDoc.exists ? partnerDoc.data() : {};
-    if(!partnerData.publicKey){
-      showToast('Partner has no public key yet — ask them to open chat', 'info', 5000);
-    }
-    const chatBox = $('chatBox'); chatBox.innerHTML = '<div class="sub">Loading messages…</div>';
+    const uid = auth.currentUser.uid;
+    const aSnap = await db.collection('couples').where('memberA','==',uid).get();
+    let coupleDoc = null;
+    if(!aSnap.empty) coupleDoc = aSnap.docs[0];
+    else { const bSnap = await db.collection('couples').where('memberB','==',uid).get(); if(!bSnap.empty) coupleDoc = bSnap.docs[0]; }
+    if(!coupleDoc){ $('chatStatus').innerText = 'Not connected to partner'; return; }
+    const c = coupleDoc.data(); const partnerId = c.memberA === uid ? c.memberB : c.memberA;
+    const pSnap = await db.collection('users').doc(partnerId).get(); const partnerData = pSnap.exists ? pSnap.data() : {};
+    if(!partnerData.publicKey) showToast('Partner not ready for chat');
+    const chatBox = $('chatBox'); chatBox.innerHTML = '<div class="small-muted">Loading…</div>';
     if(chatUnsub) chatUnsub();
-    chatUnsub = db.collection('couples').doc(coupleId).collection('messages').orderBy('ts','asc').onSnapshot(async snap => {
+    chatUnsub = db.collection('couples').doc(coupleDoc.id).collection('messages').orderBy('ts','asc').onSnapshot(async snap => {
       chatBox.innerHTML = '';
       for(const d of snap.docs){
         const data = d.data();
-        const sender = data.sender;
-        const cipher = data.ciphertext;
-        const bubble = document.createElement('div');
-        bubble.style.padding = '8px';
-        bubble.style.borderRadius = '8px';
-        bubble.style.maxWidth = '85%';
-        bubble.style.marginBottom = '8px';
-        bubble.style.wordBreak = 'break-word';
-        if(sender === user.uid){
-          bubble.style.marginLeft = 'auto';
-          bubble.style.background = 'linear-gradient(90deg,#06b6d4,#4ade80)';
-          bubble.style.color = '#062018';
-        } else {
-          bubble.style.marginRight = 'auto';
-          bubble.style.background = 'rgba(255,255,255,0.03)';
-        }
-        const plain = await decryptMessageBase64(user.uid, cipher);
-        if(plain !== null){
-          bubble.innerText = plain;
-        } else {
-          bubble.innerText = '🔒 Encrypted message — this device has no private key';
-        }
-        const tsDiv = document.createElement('div'); tsDiv.className = 'sub'; tsDiv.style.fontSize='11px'; tsDiv.style.marginTop='6px'; tsDiv.style.opacity='0.8';
-        const ts = data.ts && data.ts.toDate ? data.ts.toDate() : (data.ts ? new Date(data.ts) : new Date());
-        tsDiv.innerText = new Date(ts).toLocaleString();
-        bubble.appendChild(tsDiv);
+        const bubble = document.createElement('div'); bubble.style.padding='8px'; bubble.style.borderRadius='10px'; bubble.style.marginBottom='8px'; bubble.style.maxWidth='85%'; bubble.style.wordBreak='break-word';
+        if(data.sender === uid){ bubble.style.marginLeft='auto'; bubble.style.background='linear-gradient(90deg,var(--accent-teal),var(--accent-mag))'; bubble.style.color='#041018'; }
+        else { bubble.style.marginRight='auto'; bubble.style.background='rgba(255,255,255,0.02)'; bubble.style.color='#eaf6fb'; }
+        const plain = await decryptMessageBase64(uid, data.ciphertext);
+        bubble.innerText = plain !== null ? plain : '🔒 Encrypted message (no private key)';
+        const ts = document.createElement('div'); ts.className='small-muted'; ts.style.marginTop='6px'; ts.style.fontSize='11px';
+        ts.innerText = data.ts && data.ts.toDate ? data.ts.toDate().toLocaleString() : '';
+        bubble.appendChild(ts);
         chatBox.appendChild(bubble);
       }
       chatBox.scrollTop = chatBox.scrollHeight;
     });
   }
-
-  async function sendEncryptedMessage(){
-    const user = auth.currentUser; if(!user){ showToast('Sign in to send messages','error'); return; }
-    const info = await updateRelationshipTimer(user.uid); if(!info) return showToast('No couple found','error');
-    const coupleId = info.coupleId; const partnerId = info.partnerId;
-    const inEl = $('chatInput'); const msg = (inEl.value||'').trim(); if(!msg) return;
-    const partnerSnap = await db.collection('users').doc(partnerId).get();
-    const partnerData = partnerSnap.exists ? partnerSnap.data() : {};
-    if(!partnerData.publicKey) return showToast('Partner has no public key — ask them to open chat','error');
+  $('sendChat') && $('sendChat').addEventListener('click', async ()=> {
+    if(!auth.currentUser){ showToast('Sign in to send'); return; }
+    const txt = ($('chatInput').value||'').trim(); if(!txt) return;
+    const uid = auth.currentUser.uid; const aSnap = await db.collection('couples').where('memberA','==',uid).get();
+    let coupleDoc = null;
+    if(!aSnap.empty) coupleDoc = aSnap.docs[0];
+    else { const bSnap = await db.collection('couples').where('memberB','==',uid).get(); if(!bSnap.empty) coupleDoc = bSnap.docs[0]; }
+    if(!coupleDoc){ showToast('No partner connected'); return; }
+    const c = coupleDoc.data(); const partnerId = c.memberA === uid ? c.memberB : c.memberA;
+    const pSnap = await db.collection('users').doc(partnerId).get(); const partnerData = pSnap.exists ? pSnap.data() : {};
+    if(!partnerData.publicKey) return showToast('Partner has no public key');
     try{
-      const cipherB64 = await encryptForJwkPublic(partnerData.publicKey, msg);
-      await db.collection('couples').doc(coupleId).collection('messages').add({
-        sender: user.uid,
-        ciphertext: cipherB64,
-        ts: firebase.firestore.FieldValue.serverTimestamp()
-      });
-      inEl.value = '';
-      showToast('Message sent (encrypted)','success',1200);
-    }catch(err){ console.error('sendEncryptedMessage',err); showToast('Unable to send message','error'); }
-  }
-
-  document.addEventListener('click', (e)=>{ if(e.target && e.target.id === 'sendChat') sendEncryptedMessage(); });
-  document.getElementById('chatInput')?.addEventListener('keydown', (e)=>{ if(e.key === 'Enter'){ e.preventDefault(); sendEncryptedMessage(); }});
-
-  // initial UI
-  initAuthUI();
-  renderSidebarLeaderboard();
-
-  // Global leaderboard controls
-  $('refreshGlobal')?.addEventListener('click', ()=> renderGlobalLeaderboard());
-  $('globalSearch')?.addEventListener('input', debounce(()=> renderGlobalLeaderboard(), 220));
-
-  function debounce(fn, t){ let to; return function(...a){ clearTimeout(to); to = setTimeout(()=> fn.apply(this,a), t); }; }
-
-  // small helper: show and refresh both leaderboards
-  async function refreshAllLeaderboards(){ await renderSidebarLeaderboard(); if(document.querySelector('.nav-btn.active')?.dataset.view === 'leaderboardView') await renderGlobalLeaderboard(); }
-
-  // basic error hint
-  window.addEventListener('error', e => {
-    if(String(e.message||'').toLowerCase().includes('webchannel')) {
-      console.warn('Firestore WebChannel issue: ensure http://localhost is an authorized domain, Firestore is enabled, and you are serving over http(s).');
-      showToast('Firestore transport issue — check console', 'error', 5000);
-    }
+      const cipher = await encryptForJwkPublic(partnerData.publicKey, txt);
+      await db.collection('couples').doc(coupleDoc.id).collection('messages').add({ sender: uid, ciphertext: cipher, ts: firebase.firestore.FieldValue.serverTimestamp() });
+      $('chatInput').value=''; showToast('Message sent');
+    }catch(e){ console.error(e); showToast('Send failed'); }
   });
 
-  /***** Note: some event handlers (createPartnerCode, doConnect, saveNote, watchAd, etc.)
-         were left in place earlier — they remain unchanged from previous implementation.
-         If you want I can inline them again, but the core requested additions above are complete.
-  *****/
+  // reactive leaderboard
+  db.collection('couples').onSnapshot(()=> renderLeaderboard());
+  renderLeaderboard();
+
+  /* Utilities */
+  function escapeHtml(s){ return String(s||'').replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;'); }
+
+  // expose for debugging
+  window._twinity = { activateGame, awardPointsServer, adFlow };
 
   </script>
 </body>
