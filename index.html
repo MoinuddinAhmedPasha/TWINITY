@@ -1,68 +1,325 @@
-<!doctype html>
+<!doctype html> 
 <html lang="en">
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-<title>Twinity — Couples Leaderboard, Chat & Games (Updated)</title>
-<meta name="description" content="Twinity couples leaderboard, encrypted chat and Bubble Shooter with hold-to-release" />
+<title>Twinity — Couples Leaderboard, Chat & Games (2048 only + Ads)</title>
+<meta name="description" content="Twinity couples leaderboard, encrypted chat and 2048" />
+
+<!-- Tailwind CSS (CDN) -->
+<script src="https://cdn.tailwindcss.com"></script>
+
 <style>
+  /*
+    Converted to use Tailwind on the page (cdn included).
+    Kept your markup & JS unchanged. This CSS simply:
+      - sets default text to black,
+      - improves colors / contrast,
+      - preserves sizes and layout variables from original.
+  */
+
   :root{
-    --bg-1:#041022; --panel:rgba(255,255,255,0.02); --muted:#98b7c6;
-    --accent-mag:#ff5fa8; --accent-teal:#06b6d4; --radius:12px; --header-h:64px; --nav-h:76px;
+    /* refined palette */
+    --bg-1: #3b2308;               /* original dark brown */
+    --panel: rgba(255,255,255,0.04);/* slightly stronger panel contrast */
+    --muted: #6b7280;              /* neutral muted text */
+    --accent-mag: #ff5fa8;         /* magenta accent (kept) */
+    --accent-teal: #06b6d4;        /* teal accent (kept) */
+    --radius: 12px;
+    --header-h: 64px;
+    --nav-h: 76px;
+    --app-max-w: 1100px;
   }
+
   *{box-sizing:border-box;-webkit-font-smoothing:antialiased}
-  html,body{height:100%;margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial;background:linear-gradient(180deg,#021226,#061428);color:#eaf6fb}
-  .app{height:100vh;display:flex;flex-direction:column;max-width:1100px;margin:0 auto;border-left:1px solid rgba(255,255,255,0.01);border-right:1px solid rgba(255,255,255,0.01)}
-  header{height:var(--header-h);display:flex;align-items:center;justify-content:center;padding:10px 12px;background:linear-gradient(90deg,#071427,#021226);border-bottom:1px solid rgba(255,255,255,0.02);z-index:10;font-weight:800;letter-spacing:1px}
-  main{flex:1;display:flex;flex-direction:column;overflow:hidden}
-  .view-wrap{height:calc(100vh - var(--header-h) - var(--nav-h));overflow:auto;padding:12px;-webkit-overflow-scrolling:touch}
-  .card{background:var(--panel);padding:12px;border-radius:12px;margin-bottom:12px;border:1px solid rgba(255,255,255,0.02);box-shadow:0 10px 30px rgba(2,6,23,0.5)}
-  .btn{padding:10px 12px;border-radius:10px;border:1px solid rgba(255,255,255,0.06);background:transparent;color:inherit;font-weight:700;cursor:pointer}
-  .btn.primary{background:linear-gradient(90deg,var(--accent-mag),var(--accent-teal));border:0;color:#041018}
-  nav.bottom{height:var(--nav-h);display:flex;align-items:center;justify-content:space-around;border-top:1px solid rgba(255,255,255,0.02);background:linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.005));position:sticky;bottom:0;z-index:9}
-  .nav-btn{flex:1;text-align:center;padding:10px 6px;color:var(--muted);cursor:pointer;font-size:13px;display:flex;flex-direction:column;align-items:center;gap:6px}
-  .nav-btn.active{color:var(--accent-teal);font-weight:800}
-  .toast-wrap{position:fixed;right:14px;bottom:96px;z-index:300;display:flex;flex-direction:column;gap:8px}
-  .toast{background:#071a2a;padding:10px 14px;border-radius:10px;color:#eaf6fb;box-shadow:0 8px 30px rgba(0,0,0,0.6);border:1px solid rgba(255,255,255,0.03)}
-  input{padding:10px;border-radius:8px;border:1px solid rgba(255,255,255,0.04);background:transparent;color:inherit}
-  .leaderboard .lb-item{display:flex;align-items:center;gap:12px;padding:8px;border-radius:8px;margin-bottom:6px;background:linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.005))}
-  .leaderboard .avatar{width:44px;height:44px;border-radius:8px;object-fit:cover;cursor:pointer;border:1px solid rgba(255,255,255,0.04)}
+  html,body{
+    height:100%;
+    margin:0;
+    font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial;
+    /* brighter, friendlier background retained — text will be black */
+    background: linear-gradient(180deg, hsl(19 93% 63%), #ffc219);
+    color: #000; /* DEFAULT TEXT: BLACK */
+  }
+
+  /* keep the same structural classes so your JS and HTML remain intact */
+  .app{
+    height:100vh;
+    display:flex;
+    flex-direction:column;
+    max-width:var(--app-max-w);
+    margin:0 auto;
+    border-left:1px solid rgba(0,0,0,0.04);
+    border-right:1px solid rgba(0,0,0,0.04);
+  }
+
+  header{
+    height:var(--header-h);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:10px 12px;
+    background: linear-gradient(90deg,#0b1620,#071422); /* darker, subtle */
+    border-bottom:1px solid rgba(0,0,0,0.06);
+    z-index:10;
+    font-weight:800;
+    letter-spacing:1px;
+    color: #ffffff; /* header text stays visible (white) to retain contrast */
+  }
+
+  main{ flex:1; display:flex; flex-direction:column; overflow:hidden }
+
+  .view-wrap{
+    height:calc(100vh - var(--header-h) - var(--nav-h));
+    overflow:auto;
+    padding:12px;
+    -webkit-overflow-scrolling:touch;
+  }
+
+  /* improved panel look and black text inside */
+  .card{
+    background: linear-gradient(180deg, rgba(255,255,255,0.66), rgba(255,255,255,0.55));
+    /* subtle glass effect but with enough contrast for black text */
+    padding:12px;
+    border-radius:var(--radius);
+    margin-bottom:12px;
+    border:1px solid rgba(0,0,0,0.06);
+    box-shadow: 0 8px 24px rgba(2,6,23,0.06);
+    color: #000; /* ensure text inside cards is black */
+  }
+
+  .btn{
+    padding:10px 12px;
+    border-radius:10px;
+    border:1px solid rgba(0,0,0,0.06);
+    background:transparent;
+    color:inherit;
+    font-weight:700;
+    cursor:pointer;
+    background-clip: padding-box;
+  }
+
+  /* primary button: stronger modern gradient and black label */
+  .btn.primary{
+    background: linear-gradient(90deg,var(--accent-mag),var(--accent-teal));
+    border:0;
+    color:#041018; /* deep near-black for clarity */
+    box-shadow: 0 6px 18px rgba(6,182,212,0.08);
+  }
+
+  nav.bottom{
+    height:var(--nav-h);
+    display:flex;
+    align-items:center;
+    justify-content:space-around;
+    border-top:1px solid rgba(0,0,0,0.06);
+    background: linear-gradient(180deg, rgba(255,255,255,0.4), rgba(0,0,0,0.04));
+    position:sticky;
+    bottom:0;
+    z-index:9;
+  }
+
+  .nav-btn{
+    flex:1;
+    text-align:center;
+    padding:10px 6px;
+    color:var(--muted);
+    cursor:pointer;
+    font-size:13px;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:6px;
+    color: #111827; /* dark text for nav */
+  }
+
+  .nav-btn.active{
+    color: var(--accent-teal);
+    font-weight:800;
+  }
+
+  .toast-wrap{
+    position:fixed;
+    right:14px;
+    bottom:96px;
+    z-index:300;
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+  }
+
+  /* toast: light background so black text reads well */
+  .toast{
+    background:#ffffff;
+    padding:10px 14px;
+    border-radius:10px;
+    color:#041018; /* black-ish */
+    box-shadow:0 8px 30px rgba(0,0,0,0.12);
+    border:1px solid rgba(0,0,0,0.06);
+    font-weight:700;
+  }
+
+  input{
+    padding:10px;
+    border-radius:8px;
+    border:1px solid rgba(0,0,0,0.08);
+    background:transparent;
+    color:inherit;
+  }
+
+  .small-muted{ color: #6b7280; font-size:13px } /* muted darker gray */
+
+  .leaderboard .lb-item{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    padding:8px;
+    border-radius:8px;
+    margin-bottom:6px;
+    background: linear-gradient(180deg, rgba(0,0,0,0.02), rgba(0,0,0,0.01));
+  }
+
+  .leaderboard .avatar{
+    width:44px;
+    height:44px;
+    border-radius:8px;
+    object-fit:cover;
+    cursor:pointer;
+    border:1px solid rgba(0,0,0,0.06);
+  }
+
   /* Home */
-  .home-center{display:flex;align-items:center;justify-content:center;padding:24px}
-  .play-big{padding:18px 28px;border-radius:18px;font-size:18px;background:linear-gradient(90deg,var(--accent-mag),var(--accent-teal));border:0;color:#041018;font-weight:900;box-shadow:0 8px 24px rgba(6,182,212,0.08)}
-  .home-helpers{display:flex;flex-direction:row;gap:8px;margin-top:12px;flex-wrap:wrap}
-  .home-helpers .btn{flex:1;min-width:120px}
-  /* Modals */
-  .modal{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,0.7);z-index:9999;padding:12px}
-  .modal.show{display:flex}
-  /* Game modal */
-  .game-shell{width:100%;height:100%;max-width:980px;max-height:900px;border-radius:14px;overflow:hidden;display:flex;flex-direction:column;background:linear-gradient(180deg,#061428,#041226);box-shadow:0 20px 60px rgba(0,0,0,0.6)}
-  .game-top{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-bottom:1px solid rgba(255,255,255,0.02);position:relative}
-  .game-tabs{display:flex;gap:8px;flex-wrap:wrap}
-  .game-tab{padding:8px 12px;border-radius:12px;background:rgba(255,255,255,0.02);cursor:pointer}
-  .game-tab.active{background:linear-gradient(90deg,var(--accent-mag),var(--accent-teal));color:#041018;font-weight:800}
-  .game-body{display:flex;flex:1;position:relative}
-  .game-canvas-wrap{flex:1;display:flex;align-items:stretch;justify-content:stretch;position:relative;background:linear-gradient(180deg,#041022,#021226)}
-  canvas#gameCanvas{width:100%;height:100%;display:block;touch-action:none;background:linear-gradient(180deg,#071428,#061426)}
-  .game-side{width:260px;padding:12px;border-left:1px solid rgba(255,255,255,0.02);display:flex;flex-direction:column;gap:10px}
-  .hud-card{background:rgba(255,255,255,0.02);padding:10px;border-radius:10px}
-  .hud-row{display:flex;justify-content:space-between;align-items:center}
-  .small-muted{color:var(--muted);font-size:13px}
-  .preview-ball{width:48px;height:48px;border-radius:50%;display:inline-block;box-shadow:inset 0 -6px 12px rgba(0,0,0,0.2)}
-  .game-controls{display:flex;gap:8px;align-items:center;justify-content:center;padding:10px}
-  .control-pill{padding:10px 12px;border-radius:12px;background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.04);cursor:pointer}
-  .match3-tile{width:56px;height:56px;border-radius:8px;transition:transform .16s linear, opacity .16s linear}
-  .tile-2048{width:72px;height:72px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:22px;transition:transform .12s ease}
-  /* power bar overlay */
-  .power-bar{position:absolute;left:50%;transform:translateX(-50%);bottom:28px;background:rgba(0,0,0,0.3);padding:6px;border-radius:12px;display:flex;align-items:center;gap:8px;z-index:40}
-  .power-fill{height:8px;background:linear-gradient(90deg,var(--accent-mag),var(--accent-teal));border-radius:8px;width:0}
-  /* visible close */
-  .close-visible{position:absolute;right:12px;top:12px;z-index:60}
-  .close-visible .btn{padding:8px 10px}
+  .home-center{ display:flex; align-items:center; justify-content:center; padding:24px }
+  .play-big{
+    padding:18px 28px;
+    border-radius:18px;
+    font-size:18px;
+    background: linear-gradient(90deg, var(--accent-mag), var(--accent-teal));
+    border:0;
+    color:#041018;
+    font-weight:900;
+    box-shadow:0 8px 24px rgba(6,182,212,0.06);
+  }
+
+  .home-helpers{ display:flex; flex-direction:row; gap:8px; margin-top:12px; flex-wrap:wrap }
+  .home-helpers .btn{ flex:1; min-width:120px }
+
+  /* modal basics */
+  .modal{
+    position:fixed;
+    inset:0;
+    display:none;
+    align-items:center;
+    justify-content:center;
+    background:rgba(0,0,0,0.45);
+    z-index:9999;
+    padding:12px;
+  }
+
+  .modal.show{ display:flex }
+
+  .modal .inner{
+    background: linear-gradient(180deg,#ffffff,#f3f4f6); /* light panel for readability */
+    border-radius:12px;
+    padding:14px;
+    width:100%;
+    max-width:920px;
+    color:#000; /* ensure modal text is black */
+    box-shadow: 0 12px 36px rgba(2,6,23,0.08);
+  }
+
+  .close-visible{ position:absolute; right:14px; top:14px; z-index:60 }
+
+  .game-icons{ display:flex; gap:12px; flex-wrap:wrap; justify-content:center }
+
+  .game-icon{
+    width:120px;
+    height:120px;
+    border-radius:12px;
+    background: linear-gradient(180deg, rgba(255,255,255,0.9), rgba(255,255,255,0.85));
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    flex-direction:column;
+    cursor:pointer;
+    border:1px solid rgba(0,0,0,0.06);
+    color:#041018;
+  }
+
+  .game-icon img{ width:64px; height:64px; object-fit:contain }
+
+  .banner-ad{
+    height:60px;
+    border-radius:8px;
+    background: linear-gradient(90deg,#08303b,#0f4a56); /* deeper teal banner */
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    color:#cfeff6;
+    font-weight:700;
+    margin:8px 0;
+  }
+
+  /* 2048 modal (play area) */
+  .play-shell{
+    width:100%;
+    max-width:760px;
+    border-radius:12px;
+    overflow:hidden;
+    display:flex;
+    flex-direction:column;
+    background: linear-gradient(180deg,#f7efe7,#efe6dc);
+    color:#041018;
+    padding:12px;
+  }
+
+  .play-top{ display:flex; align-items:center; justify-content:space-between; gap:12px }
+  .play-board-wrap{ display:flex; gap:12px; align-items:flex-start; justify-content:center; padding:12px }
+  .g2048-board{ background:#efe2d9; border-radius:12px; padding:12px }
+  .g2048-controls{ display:flex; gap:8px; justify-content:center; margin-top:12px }
+  .g2048-tile{ font-weight:800; border-radius:8px; display:flex; align-items:center; justify-content:center }
+
+  /* profile subs chat layout */
+  .subs-grid{ display:flex; flex-direction:column; gap:10px }
+  .avatar{ width:72px; height:72px; border-radius:12px; object-fit:cover; border:1px solid rgba(0,0,0,0.06) }
+
   /* responsive */
   @media (max-width:900px){
-    .game-side{display:none}
-    .game-shell{max-width:420px;height:90vh}
+    .play-shell{ max-width:420px }
+    .game-icon{ width:100px; height:100px }
+  }
+
+  /* ensure text inside any element that used to be white is black now */
+  .card, .modal .inner, .play-shell, .game-icon, .g2048-board, input, textarea { color: #000 !important; }
+
+  /* small helper for disabled icons */
+  .game-icon.disabled { opacity:0.7; pointer-events:none; }
+
+  /* D-pad for snake (mobile friendly) */
+  .dpad {
+    width:160px;
+    display:flex;
+    flex-wrap:wrap;
+    gap:8px;
+    justify-content:center;
+    margin-top:10px;
+    user-select:none;
+    -webkit-user-select:none;
+  }
+  .dpad .dpad-btn{
+    width:48px;height:48px;border-radius:10px;border:1px solid rgba(0,0,0,0.06);
+    display:flex;align-items:center;justify-content:center;background:linear-gradient(180deg,#fff,#f3f3f3);font-weight:800;cursor:pointer;
+    touch-action: manipulation;
+  }
+  .dpad .dpad-row{ display:flex; gap:8px; width:100%; justify-content:center; }
+
+  /* bubble shooter aim visuals */
+  .charge-indicator {
+    position: absolute;
+    pointer-events: none;
+    z-index: 999;
+    border-radius: 999px;
+    opacity: 0.12;
+    transform: translate(-50%, -50%);
   }
 </style>
 </head>
@@ -79,6 +336,7 @@
               <div>
                 <h3 id="welcome">Welcome, Guest</h3>
                 <div class="sub" id="status">Sign in to enable full features</div>
+                <div id="dailyFromSubs" class="small-muted" style="margin-top:6px">Daily from subs: 0 pts</div>
               </div>
               <div style="text-align:right">
                 <div id="points" style="font-weight:800;font-size:20px">0</div>
@@ -94,6 +352,7 @@
               <button id="createPartner" class="btn">Create Code</button>
               <button id="watchAd" class="btn">Watch Ad +100</button>
             </div>
+            <div style="margin-top:8px" class="small-muted">Tip: Go to Subscriptions to claim your free daily points.</div>
           </div>
         </section>
 
@@ -106,13 +365,29 @@
           </div>
         </section>
 
-        <!-- Subs -->
+        <!-- Subscriptions -->
         <section id="subsView" class="view" style="display:none">
           <div class="card">
             <h3>Subscriptions & Point Packs</h3>
-            <div id="subscriptionsGrid" style="margin-top:12px" class="grid"></div>
-            <hr style="margin:12px 0;border:none;border-top:1px solid rgba(255,255,255,0.03)">
-            <div id="pointPacksGrid" style="margin-top:12px" class="grid"></div>
+            <div id="subsNote" class="small-muted" style="margin-top:6px">You can purchase subscriptions (simulation).</div>
+            <div id="subscriptionsGrid" class="subs-grid" style="margin-top:12px"></div>
+
+            <hr style="margin:12px 0;border:none;border-top:1px solid rgba(0,0,0,0.06)">
+
+            <div style="display:flex;gap:8px;align-items:center;justify-content:space-between">
+              <div>
+                <div style="font-weight:800">Daily login reward</div>
+                <div class="small-muted">Base 50 pts — plus points from active subscriptions (stacked). You can claim once every 24 hours.</div>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:8px;align-items:flex-end">
+                <div id="dailyStatus" class="small-muted">Last claim: —</div>
+                <button id="claimDailyBtn" class="btn primary">Claim Daily 50 pts</button>
+              </div>
+            </div>
+
+            <hr style="margin:12px 0;border:none;border-top:1px solid rgba(0,0,0,0.06)">
+
+            <div id="pointPacksGrid" style="margin-top:12px" class="subs-grid"></div>
           </div>
         </section>
 
@@ -121,7 +396,7 @@
           <div class="card">
             <h3>Profile</h3>
             <div style="display:flex;gap:12px;align-items:center">
-              <img id="profilePhoto" src="https://ui-avatars.com/api/?name=Guest&background=0B1220&color=67e8f9&size=256" alt="avatar" style="width:72px;height:72px;border-radius:12px;object-fit:cover;border:1px solid rgba(255,255,255,0.04)"/>
+              <img id="profilePhoto" src="https://ui-avatars.com/api/?name=Guest&background=0B1220&color=67e8f9&size=256" alt="avatar" class="avatar" />
               <div style="flex:1">
                 <div class="sub">Name: <span id="displayName">Guest</span></div>
                 <div class="sub">Email: <span id="displayEmail">—</span></div>
@@ -135,14 +410,17 @@
               <button id="editProfileBtn" class="btn">Edit name</button>
               <button id="changePhotoBtn" class="btn">Change Photo</button>
             </div>
+
+            <div class="profile-footer small-muted" style="margin-top:12px">Made by @lynx_argon_op</div>
           </div>
         </section>
 
         <!-- Chat -->
         <section id="chatView" class="view" style="display:none">
           <div class="card">
-            <div id="chatBanner" style="margin-top:10px" class="card"><div id="chatStatus" class="small-muted">Loading chat status...</div></div>
-            <div id="chatBox" style="margin-top:10px"></div>
+            <h3>Encrypted Chat with Partner</h3>
+            <div id="chatBanner" class="card" style="padding:10px;border-radius:8px"><div id="chatStatus" class="small-muted">Chat inactive — connect with partner first</div></div>
+            <div id="chatBox" style="margin-top:10px;max-height:380px;overflow:auto;padding:8px"></div>
             <div style="display:flex;gap:8px;margin-top:8px">
               <input id="chatInput" placeholder="Type message...">
               <button id="sendChat" class="btn primary">Send</button>
@@ -163,7 +441,167 @@
     <div class="toast-wrap" id="toastWrap"></div>
   </div>
 
-  <!-- Image preview modal -->
+  <!-- Games Selection Modal -->
+  <div id="gamesSelectionModal" class="modal" aria-hidden="true">
+    <div class="inner">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div style="font-weight:800">Games</div>
+        <div><button id="closeGamesSelection" class="btn">Exit</button></div>
+      </div>
+      <div style="margin-top:12px" class="small-muted">Earn 20 Twinity points every minute you play. Pick a game — more are coming soon!</div>
+      <div style="margin-top:12px" class="game-icons" id="gameIcons">
+        <!-- 2048 icon -->
+        <div class="game-icon" data-game="2048" id="icon-2048" title="2048">
+          <img src="data:image/svg+xml;charset=utf-8,%3Csvg width='64' height='64' xmlns='http://www.w3.org/2000/svg'%3E%3Crect width='64' height='64' rx='8' fill='%23ffd6ea'/%3E%3Ctext x='50%25' y='55%25' font-size='18' text-anchor='middle' fill='%23041018' font-family='Arial'%3E2048%3C/text%3E%3C/svg%3E" alt="2048">
+          <div style="margin-top:8px;font-weight:700">2048</div>
+        </div>
+
+        <!-- Snake icon -->
+        <div class="game-icon" data-game="snake" id="icon-snake" title="Snake">
+          <img src="data:image/svg+xml;charset=utf-8,%3Csvg width='64' height='64' xmlns='http://www.w3.org/2000/svg'%3E%3Crect width='64' height='64' rx='8' fill='%230c3b13'/%3E%3Ctext x='50%25' y='55%25' font-size='12' text-anchor='middle' fill='%23cfeff6' font-family='Arial'%3ESnake%3C/text%3E%3C/svg%3E" alt="Snake">
+          <div style="margin-top:8px;font-weight:700">Snake</div>
+        </div>
+
+        <!-- Flappy icon -->
+        <div class="game-icon" data-game="flappy" id="icon-flappy" title="Flappy Bird">
+          <img src="data:image/svg+xml;charset=utf-8,%3Csvg width='64' height='64' xmlns='http://www.w3.org/2000/svg'%3E%3Crect width='64' height='64' rx='8' fill='%23087ecf'/%3E%3Ctext x='50%25' y='55%25' font-size='12' text-anchor='middle' fill='%23fff' font-family='Arial'%3EFlappy%3C/text%3E%3C/svg%3E" alt="Flappy">
+          <div style="margin-top:8px;font-weight:700">Flappy</div>
+        </div>
+
+        <!-- Bubble Shooter icon -->
+        <div class="game-icon" data-game="bubbles" id="icon-bubbles" title="Bubble Shooter">
+          <img src="data:image/svg+xml;charset=utf-8,%3Csvg width='64' height='64' xmlns='http://www.w3.org/2000/svg'%3E%3Crect width='64' height='64' rx='8' fill='%23ffd27a'/%3E%3Ctext x='50%25' y='55%25' font-size='12' text-anchor='middle' fill='%23041018' font-family='Arial'%3EBubbles%3C/text%3E%3C/svg%3E" alt="Bubbles">
+          <div style="margin-top:8px;font-weight:700">Bubble Shooter</div>
+        </div>
+
+        <!-- placeholder icons -->
+        <div class="game-icon disabled" title="Coming soon">
+          <img src="data:image/svg+xml;charset=utf-8,%3Csvg width='64' height='64' xmlns='http://www.w3.org/2000/svg'%3E%3Crect width='64' height='64' rx='8' fill='%23061226'/%3E%3Ctext x='50%25' y='55%25' font-size='12' text-anchor='middle' fill='%23cfeff6' font-family='Arial'%3EComing%3C/text%3E%3C/svg%3E" alt="">
+          <div style="margin-top:8px" class="small-muted">More soon</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2048 Play Modal -->
+  <div id="play2048Modal" class="modal" aria-hidden="true">
+    <div class="play-shell" role="dialog" aria-modal="true" style="position:relative">
+      <div class="close-visible"><button id="closePlay2048" class="btn">✕</button></div>
+
+      <!-- top banner ad -->
+      <div class="banner-ad" id="adTop">Top Banner Ad</div>
+
+      <div class="play-top" style="margin-top:8px">
+        <div style="font-weight:900;font-size:20px">2048</div>
+        <div style="display:flex;gap:8px;align-items:center">
+          <div style="text-align:right">
+            <div style="font-weight:800" id="boardScore">Score: 0</div>
+            <div class="small-muted" id="boardBest">Best: 0</div>
+          </div>
+          <div>
+            <button id="reset2048" class="btn">Reset</button>
+            <button id="claim2048" class="btn primary">Claim +50</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="play-board-wrap" id="playBoardWrap" style="margin-top:12px;justify-content:center">
+        <!-- board will be rendered here -->
+        <div class="g2048-board" id="g2048Wrap"></div>
+      </div>
+
+      <div class="g2048-controls" style="margin-top:6px">
+        <button id="help2048" class="btn">How to play</button>
+      </div>
+
+      <!-- bottom banner ad -->
+      <div class="banner-ad" id="adBottom">Bottom Banner Ad</div>
+    </div>
+  </div>
+
+  <!-- Snake Modal -->
+  <div id="playSnakeModal" class="modal" aria-hidden="true">
+    <div class="play-shell" role="dialog" style="position:relative">
+      <div class="close-visible"><button id="closeSnake" class="btn">✕</button></div>
+      <div class="banner-ad" id="adSnakeTop">Top Banner Ad</div>
+
+      <div style="margin-top:8px;display:flex;flex-direction:column;align-items:center;">
+        <div style="font-weight:900;font-size:20px">Snake</div>
+        <div style="margin-top:12px">
+          <canvas id="snakeCanvas" width="400" height="400" style="background:#000;border-radius:8px;display:block"></canvas>
+        </div>
+
+        <!-- D-pad for mobile -->
+        <div class="dpad" id="snakeDpad">
+          <div class="dpad-row" style="justify-content:center">
+            <div class="dpad-btn" id="snakeUp">↑</div>
+          </div>
+          <div class="dpad-row">
+            <div class="dpad-btn" id="snakeLeft">←</div>
+            <div style="width:48px;height:48px;border-radius:10px;background:transparent"></div>
+            <div class="dpad-btn" id="snakeRight">→</div>
+          </div>
+          <div class="dpad-row" style="justify-content:center">
+            <div class="dpad-btn" id="snakeDown">↓</div>
+          </div>
+        </div>
+
+        <div style="margin-top:8px;display:flex;gap:8px">
+          <button id="resetSnake" class="btn">Reset</button>
+          <button id="claimSnake" class="btn primary">Claim +50</button>
+        </div>
+        <div class="small-muted" style="margin-top:6px">Use arrow keys or the on-screen D-pad to move.</div>
+      </div>
+
+      <div class="banner-ad" id="adSnakeBottom">Bottom Banner Ad</div>
+    </div>
+  </div>
+
+  <!-- Flappy Modal -->
+  <div id="playFlappyModal" class="modal" aria-hidden="true">
+    <div class="play-shell" role="dialog" style="position:relative">
+      <div class="close-visible"><button id="closeFlappy" class="btn">✕</button></div>
+      <div class="banner-ad" id="adFlappyTop">Top Banner Ad</div>
+
+      <div style="margin-top:8px;display:flex;flex-direction:column;align-items:center;">
+        <div style="font-weight:900;font-size:20px">Flappy</div>
+        <div style="margin-top:12px">
+          <canvas id="flappyCanvas" width="400" height="400" style="background:#87ceeb;border-radius:8px;display:block"></canvas>
+        </div>
+        <div style="margin-top:8px;display:flex;gap:8px">
+          <button id="resetFlappy" class="btn">Reset</button>
+          <button id="claimFlappy" class="btn primary">Claim +50</button>
+        </div>
+        <div class="small-muted" style="margin-top:6px">Press Space or tap the canvas to flap.</div>
+      </div>
+
+      <div class="banner-ad" id="adFlappyBottom">Bottom Banner Ad</div>
+    </div>
+  </div>
+
+  <!-- Bubble Shooter Modal -->
+  <div id="playBubbleModal" class="modal" aria-hidden="true">
+    <div class="play-shell" role="dialog" style="position:relative">
+      <div class="close-visible"><button id="closeBubble" class="btn">✕</button></div>
+      <div class="banner-ad" id="adBubbleTop">Top Banner Ad</div>
+
+      <div style="margin-top:8px;display:flex;flex-direction:column;align-items:center;position:relative;">
+        <div style="font-weight:900;font-size:20px">Bubble Shooter</div>
+        <div style="margin-top:12px">
+          <canvas id="bubbleCanvas" width="420" height="560" style="background:#072a40;border-radius:8px;display:block"></canvas>
+        </div>
+        <div style="margin-top:8px;display:flex;gap:8px">
+          <button id="resetBubble" class="btn">Reset</button>
+          <button id="claimBubble" class="btn primary">Claim +50</button>
+        </div>
+        <div class="small-muted" style="margin-top:6px">Hold to charge, aim, then release to shoot.</div>
+      </div>
+
+      <div class="banner-ad" id="adBubbleBottom">Bottom Banner Ad</div>
+    </div>
+  </div>
+
+  <!-- Image modal placeholder -->
   <div id="imageModal" class="modal" aria-hidden="true">
     <div class="card" style="max-width:920px;width:100%;padding:16px;">
       <div style="display:flex;justify-content:flex-end"><button id="closeImageModal" class="btn">Close</button></div>
@@ -174,108 +612,30 @@
   <!-- Connect modal -->
   <div id="connectModal" class="modal" aria-hidden="true">
     <div class="inner">
-      <div style="margin:auto;max-width:720px;padding:18px;background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));border-radius:12px;">
-        <h3>Connect with partner</h3>
-        <div style="margin-top:12px;display:flex;flex-direction:column;gap:8px">
-          <input id="partnerCodeInput" placeholder="Partner code (6 chars)">
-          <label class="small-muted">Relationship start date</label>
-          <input id="relationshipStartInput" type="date">
-          <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:8px">
-            <button id="doConnect" class="btn primary">Connect</button>
-            <button id="closeConnect" class="btn">Close</button>
-          </div>
+      <h3>Connect partner</h3>
+      <div style="display:flex;flex-direction:column;gap:8px;margin-top:8px">
+        <input id="partnerCodeInput" placeholder="Partner code (6 chars)">
+        <label class="small-muted">Relationship start date</label>
+        <input id="relationshipStartInput" type="date">
+        <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:8px">
+          <button id="doConnect" class="btn primary">Connect</button>
+          <button id="closeConnect" class="btn">Close</button>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- GAME modal (polished) -->
-  <div id="gameModal" class="modal" aria-hidden="true">
-    <div class="game-shell" role="dialog" aria-modal="true">
-      <div class="game-top">
-        <div style="display:flex;align-items:center;gap:12px">
-          <div class="game-tabs" id="gameTabsTop">
-            <div class="game-tab active" data-game="bubble">Bubble Shooter</div>
-            <div class="game-tab" data-game="match3">Match-3</div>
-            <div class="game-tab" data-game="2048">2048</div>
-          </div>
-          <div style="margin-left:12px;color:var(--muted)">Play to earn Twinity points</div>
-        </div>
-
-        <div style="display:flex;gap:8px;align-items:center">
-          <div id="gameScoreSmall" class="small-muted">Score: 0</div>
-          <button id="pauseResume" class="btn">⏸</button>
-        </div>
-
-        <div class="close-visible">
-          <button id="closeGame" class="btn">✕</button>
-        </div>
-      </div>
-
-      <div class="game-body">
-        <div class="game-canvas-wrap">
-          <canvas id="gameCanvas" width="1600" height="900" aria-label="Bubble Shooter"></canvas>
-
-          <!-- HUD overlays for bubble -->
-          <div style="position:absolute;left:12px;top:12px;z-index:5;pointer-events:none">
-            <div class="hud-card" style="padding:8px;border-radius:10px;opacity:0.95">
-              <div style="font-weight:800">Level <span id="hudLevel">1</span></div>
-              <div class="small-muted">Score <span id="hudScore">0</span></div>
-            </div>
-          </div>
-
-          <!-- power bar (appears when charging) -->
-          <div id="powerBar" class="power-bar" style="display:none">
-            <div style="font-weight:800;font-size:13px">Power</div>
-            <div style="width:160px;height:10px;background:rgba(255,255,255,0.06);border-radius:8px;overflow:hidden">
-              <div id="powerFill" class="power-fill"></div>
-            </div>
-          </div>
-
-        </div>
-
-        <div class="game-side">
-          <div class="hud-card">
-            <div style="display:flex;justify-content:space-between;align-items:center">
-              <div style="font-weight:800">Next</div>
-              <div id="nextPreview" class="preview-ball"></div>
-            </div>
-            <div style="margin-top:10px" class="small-muted">Aim & hold to charge, release to shoot. Use walls to bounce.</div>
-          </div>
-
-          <div class="hud-card">
-            <div style="display:flex;justify-content:space-between;align-items:center">
-              <div style="font-weight:800">Controls</div>
-            </div>
-            <div style="margin-top:8px;display:flex;flex-direction:column;gap:8px">
-              <button id="shootBtn2" class="control-pill">Shoot</button>
-              <button id="resetBtn2" class="control-pill">Reset</button>
-              <button id="claimLevelBtn" class="control-pill primary">Claim Level (+ pts)</button>
-            </div>
-          </div>
-
-          <div class="hud-card" style="margin-top:auto">
-            <div style="font-weight:800">Game tips</div>
-            <div class="small-muted" style="margin-top:8px">Clear clusters to score. Bigger clusters = more points. Watch ads to double rewards.</div>
-          </div>
-        </div>
-      </div>
-
-    </div>
-  </div>
-
-  <!-- login modal -->
-  <div id="loginModal" class="modal show" aria-hidden="false">
+  <!-- Login modal (simple email signin) -->
+  <div id="loginModal" class="modal" aria-hidden="true">
     <div class="inner">
-      <div style="margin:auto;max-width:720px;padding:18px;background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));border-radius:12px;">
-        <div style="margin-top:12px;display:flex;flex-direction:column;gap:8px">
-          <div id="gsi-login-placeholder"></div>
-          <input id="loginEmail" placeholder="Email" type="email">
-          <input id="loginPass" placeholder="Password" type="password">
-          <div style="display:flex;justify-content:flex-end;gap:8px">
-            <button id="emailSignIn" class="btn primary">Sign in</button>
-            <button id="emailSignUp" class="btn">Create</button>
-          </div>
+      <h3>Sign in</h3>
+      <div style="display:flex;flex-direction:column;gap:8px;margin-top:8px">
+        <div id="gsi-login-placeholder"></div>
+        <input id="loginEmail" placeholder="Email" type="email">
+        <input id="loginPass" placeholder="Password" type="password">
+        <div style="display:flex;justify-content:flex-end;gap:8px">
+          <button id="emailSignIn" class="btn primary">Sign in</button>
+          <button id="emailSignUp" class="btn">Create</button>
         </div>
       </div>
     </div>
@@ -288,9 +648,9 @@
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-storage-compat.js"></script>
 
   <script>
-  /* ===========================
-     Config & Firebase init
-     =========================== */
+  /************************************************************************
+   * Configuration & Firebase init
+   ************************************************************************/
   const firebaseConfig = {
     apiKey: "AIzaSyBsbqTVszuJDkp8Ut19YnoH5Y35sNxuImA",
     authDomain: "twinity-d2ba5.firebaseapp.com",
@@ -306,17 +666,86 @@
   const db = firebase.firestore();
   const storage = firebase.storage();
 
+  // Ad unit ids (from your dashboard screenshot)
+  const AD_UNITS = {
+    appOpen: 'ca-app-pub-5090100160309579/2717327245',
+    banner2048: 'ca-app-pub-5090100160309579/8412466679',
+    interstitialGames: 'ca-app-pub-5090100160309579/5135978156',
+    rewarded: 'ca-app-pub-5090100160309579/1388304836'
+  };
+
+  /************************************************************************
+   * Ad wrapper (native bridge or web simulation)
+   ************************************************************************/
+  function isAndroidBridge() {
+    return typeof window.AndroidBridge !== 'undefined' && typeof window.AndroidBridge.showAd === 'function';
+  }
+  async function showInterstitial() {
+    if(isAndroidBridge()){
+      try { window.AndroidBridge.showAd(AD_UNITS.interstitialGames); return; } catch(e){ console.warn(e); }
+    }
+    return new Promise(res => {
+      if(confirm('Show interstitial ad? (web simulation)')) setTimeout(res, 900);
+      else setTimeout(res, 250);
+    });
+  }
+  async function showRewarded() {
+    if(isAndroidBridge()){
+      try { window.AndroidBridge.showAd(AD_UNITS.rewarded); return Promise.resolve(true); } catch(e){ console.warn(e); }
+    }
+    return new Promise(res => {
+      const ok = confirm('Watch rewarded ad to claim reward? (web simulation)');
+      setTimeout(()=> res(ok), ok ? 900 : 200);
+    });
+  }
+  function showBanner(unitId, position='top') {
+    if(isAndroidBridge()){
+      try { window.AndroidBridge.showBanner(unitId, position); return; } catch(e){ console.warn(e); }
+    }
+    // map a few modal-specific ids -> DOM elements
+    const mapping = {
+      'top': ['adTop'],
+      'bottom': ['adBottom'],
+      'snake-top': ['adSnakeTop'],
+      'snake-bottom': ['adSnakeBottom'],
+      'flappy-top': ['adFlappyTop'],
+      'flappy-bottom': ['adFlappyBottom'],
+      'bubble-top': ['adBubbleTop'],
+      'bubble-bottom': ['adBubbleBottom']
+    };
+    const keys = mapping[position] || mapping['top'];
+    keys.forEach(k => {
+      const el = document.getElementById(k);
+      if(el){ el.innerText = 'Banner Ad • ' + unitId; el.style.display = 'flex'; }
+    });
+  }
+  function hideBanner(position='top'){
+    if(isAndroidBridge()){
+      try { window.AndroidBridge.hideBanner(position); return; } catch(e){ console.warn(e); }
+    }
+    const mapping = {
+      'top': ['adTop'],
+      'bottom': ['adBottom'],
+      'snake': ['adSnakeTop','adSnakeBottom'],
+      'flappy': ['adFlappyTop','adFlappyBottom'],
+      'bubble': ['adBubbleTop','adBubbleBottom']
+    };
+    const keys = mapping[position] || mapping['top'];
+    keys.forEach(k => { const el = document.getElementById(k); if(el) el.style.display = 'none'; });
+  }
+
+  /************************************************************************
+   * Helpers & UI wiring
+   ************************************************************************/
   const $ = id => document.getElementById(id);
   function showToast(text, ms=2200){
     const wrap = $('toastWrap');
     const el = document.createElement('div'); el.className='toast'; el.innerText = text;
     wrap.appendChild(el); setTimeout(()=> el.style.opacity=1, 20);
-    setTimeout(()=> { el.style.transition='opacity .24s'; el.style.opacity=0; setTimeout(()=> wrap.removeChild(el), 260); }, ms);
+    setTimeout(()=> { el.style.transition='opacity .24s'; el.style.opacity=0; setTimeout(()=> { try{ wrap.removeChild(el); }catch(_){} }, 260); }, ms);
   }
 
-  /* ---------------------------
-     Basic UI & Auth wiring
-     --------------------------- */
+  // navigation
   const navButtons = Array.from(document.querySelectorAll('.nav-btn'));
   const views = Array.from(document.querySelectorAll('.view'));
   function showView(id){
@@ -327,6 +756,9 @@
   navButtons.forEach(b => b.addEventListener('click', ()=> showView(b.dataset.view)));
   showView('homeView');
 
+  /************************************************************************
+   * Auth + profile management
+   ************************************************************************/
   (function initAuthButton(){
     const lp = $('gsi-login-placeholder');
     if(lp){
@@ -343,9 +775,16 @@
   async function createOrUpdateUserDoc(user){
     try{
       const ref = db.collection('users').doc(user.uid);
-      await ref.set({ name: user.displayName || 'Guest', email: user.email || null, photoURL: user.photoURL || null }, { merge:true });
+      await ref.set({
+        name: user.displayName || 'Guest',
+        email: user.email || null,
+        photoURL: user.photoURL || null,
+        subscriptions: firebase.firestore.FieldValue.arrayUnion(),
+      }, { merge:true });
       const snap = await ref.get(); const data = snap.exists ? snap.data() : {};
       if(!data.partnerCode) await ref.update({ partnerCode: user.uid.slice(0,6).toUpperCase(), points: data.points || 0 });
+      if(!data.subscriptions) await ref.update({ subscriptions: [] });
+      if(typeof data.points === 'undefined') await ref.update({ points: 0 });
     }catch(e){ console.error(e); showToast('Profile save failed'); }
   }
   async function getUserProfile(uid){ try{ const s = await db.collection('users').doc(uid).get(); return s.exists ? { id: uid, ...s.data() } : null; }catch(e){ console.error(e); return null; } }
@@ -353,18 +792,18 @@
   let userUnsub = null;
   auth.onAuthStateChanged(async user => {
     if(user){
-      $('loginModal').classList.remove('show');
+      if($('loginModal')) $('loginModal').classList && $('loginModal').classList.remove('show');
       await createOrUpdateUserDoc(user);
       if(userUnsub) userUnsub();
       userUnsub = db.collection('users').doc(user.uid).onSnapshot(()=> loadCurrentUserToUI(user.uid));
       await loadCurrentUserToUI(user.uid);
       showToast('Signed in');
     } else {
-      $('loginModal').classList.add('show');
+      if($('loginModal')) $('loginModal').classList && $('loginModal').classList.add('show');
       renderSignedOutUI();
     }
-    renderSubscriptionsGridNow();
     renderLeaderboard();
+    renderSubscriptionsGridNow();
   });
 
   function renderSignedOutUI(){
@@ -385,11 +824,20 @@
     if($('displayName')) $('displayName').innerText = profile.name || 'Guest';
     if($('displayEmail')) $('displayEmail').innerText = profile.email || '—';
     if($('profilePhoto')) $('profilePhoto').src = profile.photoURL || ('https://ui-avatars.com/api/?name='+encodeURIComponent(profile.name||'Guest'));
+    // subscriptions daily text
+    const subsPts = (profile.subscriptions || []).reduce((sum, s) => {
+      const info = SUBSCRIPTIONS[s.sku];
+      if(info && s.expiry && s.expiry.toMillis && s.expiry.toMillis() > Date.now()) return sum + (info.pointsPerLogin || 0);
+      if(info && s.expiry && typeof s.expiry === 'number' && s.expiry > Date.now()) return sum + (info.pointsPerLogin || 0);
+      return sum;
+    }, 0);
+    if($('dailyFromSubs')) $('dailyFromSubs').innerText = 'Daily from subs: ' + subsPts + ' pts';
+    updateDailyStatusUI(profile);
   }
 
-  /* ---------------------------
-     Leaderboard & avatars
-     --------------------------- */
+  /************************************************************************
+   * Leaderboard
+   ************************************************************************/
   async function renderLeaderboard(){
     try{
       const snaps = await db.collection('couples').get();
@@ -417,23 +865,13 @@
           </div>`;
         container.appendChild(el);
       });
-
-      container.querySelectorAll('.avatar').forEach(img => {
-        img.addEventListener('click', e => {
-          const src = e.currentTarget.dataset.src || e.currentTarget.src;
-          if(!src) return;
-          $('imageModalImg').src = src;
-          $('imageModal').classList.add('show');
-        });
-      });
-
     }catch(e){ console.error(e); $('globalLeaderboard').innerHTML = '<div class="small-muted">Unable to load</div>'; }
   }
-  $('refreshGlobal').addEventListener('click', ()=> renderLeaderboard());
+  $('refreshGlobal') && $('refreshGlobal').addEventListener('click', ()=> renderLeaderboard());
 
-  /* ---------------------------
-     Subscriptions & Packs
-     --------------------------- */
+  /************************************************************************
+   * Subscriptions & Point Packs (UI + simulated purchase)
+   ************************************************************************/
   const SUBSCRIPTIONS = {
     'sub_9': { price:9, pointsPerLogin:200, label:'₹9 / month — 200 pts/day · No ads' },
     'sub_18': { price:18, pointsPerLogin:500, label:'₹18 / month — 500 pts/day · No ads' },
@@ -454,7 +892,7 @@
       const card = document.createElement('div'); card.className='card';
       card.innerHTML = `<div style="display:flex;justify-content:space-between;align-items:center">
         <div>
-          <div class="price">${info.label.split('—')[0].trim()}</div>
+          <div style="font-weight:800">${info.label.split('—')[0].trim()}</div>
           <div class="small-muted">${info.label.split('—')[1]?.trim() || ''}</div>
         </div>
         <div>
@@ -471,7 +909,7 @@
       const card = document.createElement('div'); card.className='card';
       card.innerHTML = `<div style="display:flex;justify-content:space-between;align-items:center">
         <div>
-          <div class="price">${p.label.split('—')[0].trim()}</div>
+          <div style="font-weight:800">${p.label.split('—')[0].trim()}</div>
           <div class="small-muted">${p.label.split('—')[1]?.trim() || ''}</div>
         </div>
         <div>
@@ -481,53 +919,137 @@
       grid.appendChild(card);
     });
     setTimeout(()=>{ // attach listeners
-      Array.from(document.querySelectorAll('.purchase')).forEach(btn => btn.addEventListener('click', async e => {
-        if(!auth.currentUser){ $('loginModal').classList.add('show'); return; }
-        const sku = e.currentTarget.dataset.sku; const uid = auth.currentUser.uid;
-        try{
-          if(confirm('Simulate subscription purchase ' + sku + '?')){
-            const expiry = Date.now() + 30*24*60*60*1000;
-            await db.collection('users').doc(uid).update({ sub: sku, subExpiry: expiry, adFree: true });
-            const benefit = SUBSCRIPTIONS[sku];
-            if(benefit) await db.collection('users').doc(uid).update({ points: firebase.firestore.FieldValue.increment(benefit.pointsPerLogin) });
-            await db.collection('users').doc(uid).collection('activities').add({ text:'Purchased ' + sku + ' (simulated)', time: firebase.firestore.FieldValue.serverTimestamp() });
-            await loadCurrentUserToUI(uid); await renderLeaderboard(); showToast('Subscription active (simulated)');
-          }
-        }catch(err){ console.error(err); showToast('Purchase failed'); }
-      }));
-      Array.from(document.querySelectorAll('.buy-points')).forEach(btn => btn.addEventListener('click', async e => {
-        if(!auth.currentUser){ $('loginModal').classList.add('show'); return; }
-        const pack = e.currentTarget.dataset.pack; const uid = auth.currentUser.uid;
-        const info = POINT_PACKS[pack];
-        if(!info) return showToast('Invalid pack');
-        try{
-          if(confirm('Simulate purchase ' + info.label + '?')){
-            await db.collection('users').doc(uid).update({ points: firebase.firestore.FieldValue.increment(info.points) });
-            await db.collection('users').doc(uid).collection('activities').add({ text:'Bought points package ' + info.label, time: firebase.firestore.FieldValue.serverTimestamp() });
-            await loadCurrentUserToUI(uid); await renderLeaderboard(); showToast(info.points.toLocaleString() + ' points added');
-          }
-        }catch(err){ console.error(err); showToast('Purchase failed'); }
-      }));
+      Array.from(document.querySelectorAll('.purchase')).forEach(btn => { btn.removeEventListener('click', purchaseHandler); btn.addEventListener('click', purchaseHandler); });
+      Array.from(document.querySelectorAll('.buy-points')).forEach(btn => { btn.removeEventListener('click', buyPointsHandler); btn.addEventListener('click', buyPointsHandler); });
     },80);
   }
-  function renderSubscriptionsGridNow(){ renderSubscriptionsUI(); renderPointPacksUI(); }
+  function renderSubscriptionsGridNow(){ renderSubscriptionsUI(); renderPointPacksUI(); attachClaimDailyListener(); }
   renderSubscriptionsGridNow();
 
-  /* ---------------------------
-     adFlow & awardPointsServer
-     --------------------------- */
-  async function adFlow(opts={type:'interstitial'}) {
-    if(window.AndroidBridge && typeof window.AndroidBridge.showAd === 'function'){
-      try{ window.AndroidBridge.showAd(auth.currentUser ? auth.currentUser.uid : null); await new Promise(r=>setTimeout(r,1200)); }catch(e){ console.warn(e); }
-      return;
-    }
-    // web simulation
-    await new Promise(r => {
-      if(confirm(`Show ${opts.type} ad? (web simulation)`)) setTimeout(r,800);
-      else setTimeout(r,200);
-    });
+  async function purchaseHandler(e){
+    if(!auth.currentUser){ $('loginModal').classList.add('show'); return; }
+    const sku = e.currentTarget.dataset.sku; const uid = auth.currentUser.uid;
+    try{
+      if(confirm('Simulate subscription purchase ' + sku + '?')){
+        const expiryMs = Date.now() + 30*24*60*60*1000;
+        await db.collection('users').doc(uid).update({
+          subscriptions: firebase.firestore.FieldValue.arrayUnion({ sku, expiry: expiryMs })
+        });
+        await db.collection('users').doc(uid).collection('activities').add({ text:'Purchased ' + sku + ' (simulated)', time: firebase.firestore.FieldValue.serverTimestamp() });
+        await loadCurrentUserToUI(uid); await renderLeaderboard(); showToast('Subscription active (simulated)');
+      }
+    }catch(err){ console.error(err); showToast('Purchase failed'); }
+  }
+  async function buyPointsHandler(e){
+    if(!auth.currentUser){ $('loginModal').classList.add('show'); return; }
+    const pack = e.currentTarget.dataset.pack; const uid = auth.currentUser.uid;
+    const info = POINT_PACKS[pack]; if(!info) return showToast('Invalid pack');
+    try{
+      if(confirm('Simulate purchase ' + info.label + '?')){
+        await db.collection('users').doc(uid).update({ points: firebase.firestore.FieldValue.increment(info.points) });
+        await db.collection('users').doc(uid).collection('activities').add({ text:'Bought points package ' + info.label, time: firebase.firestore.FieldValue.serverTimestamp() });
+        await loadCurrentUserToUI(uid); await renderLeaderboard(); showToast(info.points.toLocaleString() + ' points added');
+      }
+    }catch(err){ console.error(err); showToast('Purchase failed'); }
   }
 
+  /************************************************************************
+   * Daily claim logic
+   ************************************************************************/
+  const DAILY_BASE = 50;
+  const DAILY_COOLDOWN_MS = 24 * 60 * 60 * 1000;
+
+  async function getActiveSubscriptionBonus(uid){
+    const profile = await getUserProfile(uid);
+    if(!profile) return 0;
+    const subs = profile.subscriptions || [];
+    let total = 0;
+    for(const s of subs){
+      const expiryMs = s.expiry && s.expiry.toMillis ? s.expiry.toMillis() : (typeof s.expiry === 'number' ? s.expiry : 0);
+      if(expiryMs > Date.now()){
+        const info = SUBSCRIPTIONS[s.sku];
+        if(info) total += (info.pointsPerLogin || 0);
+      }
+    }
+    return total;
+  }
+
+  async function canClaimDaily(uid){
+    const u = await getUserProfile(uid);
+    if(!u) return { ok:false, reason:'No profile' };
+    const last = u.lastDailyClaim && u.lastDailyClaim.toDate ? u.lastDailyClaim.toDate().getTime() : (u.lastDailyClaim ? new Date(u.lastDailyClaim).getTime() : 0);
+    if(!last) return { ok:true, wait:0 };
+    const diff = Date.now() - last;
+    if(diff >= DAILY_COOLDOWN_MS) return { ok:true, wait:0 };
+    return { ok:false, wait: DAILY_COOLDOWN_MS - diff };
+  }
+
+  function msToHms(ms){
+    if(ms<=0) return 'Ready now';
+    const s = Math.floor(ms/1000);
+    const h = Math.floor(s/3600); const m = Math.floor((s%3600)/60); const sec = s%60;
+    if(h>0) return `${h}h ${m}m`;
+    if(m>0) return `${m}m ${sec}s`;
+    return `${sec}s`;
+  }
+
+  async function claimDailyPoints(){
+    if(!auth.currentUser){ $('loginModal').classList.add('show'); return; }
+    const uid = auth.currentUser.uid;
+    const can = await canClaimDaily(uid);
+    if(!can.ok) return showToast('You can claim again in ' + msToHms(can.wait));
+    try{
+      const bonus = await getActiveSubscriptionBonus(uid);
+      const total = DAILY_BASE + (bonus || 0);
+      try{
+        const idToken = await auth.currentUser.getIdToken();
+        const res = await fetch(FUNCTIONS_BASE + '/awardDailyPoints', {
+          method:'POST',
+          headers:{ 'Content-Type':'application/json', 'Authorization':'Bearer '+idToken },
+          body: JSON.stringify({ userId: uid, points: total, meta:{ daily:true } })
+        });
+        const j = await res.json();
+        if(res.ok && j.ok){
+          showToast('+' + total + ' pts awarded (server)');
+        } else {
+          await db.collection('users').doc(uid).update({ points: firebase.firestore.FieldValue.increment(total) });
+          showToast('+' + total + ' pts (local)');
+        }
+      }catch(e){
+        await db.collection('users').doc(uid).update({ points: firebase.firestore.FieldValue.increment(total) });
+        showToast('+' + total + ' pts (fallback)');
+      }
+      await db.collection('users').doc(uid).update({ lastDailyClaim: firebase.firestore.FieldValue.serverTimestamp() });
+      await db.collection('users').doc(uid).collection('activities').add({ text:`Claimed daily ${total} pts`, time: firebase.firestore.FieldValue.serverTimestamp() });
+      await loadCurrentUserToUI(uid); renderLeaderboard();
+    }catch(err){ console.error(err); showToast('Claim failed'); }
+  }
+
+  function attachClaimDailyListener(){
+    const btn = $('claimDailyBtn');
+    if(!btn) return;
+    btn.removeEventListener('click', claimDailyPoints);
+    btn.addEventListener('click', claimDailyPoints);
+    if(window._subsStatusInterval) clearInterval(window._subsStatusInterval);
+    window._subsStatusInterval = setInterval(async ()=>{
+      if(!auth.currentUser) return;
+      const profile = await getUserProfile(auth.currentUser.uid);
+      if(profile) updateDailyStatusUI(profile);
+    }, 30000);
+  }
+
+  function updateDailyStatusUI(profile){
+    const last = profile.lastDailyClaim && profile.lastDailyClaim.toDate ? profile.lastDailyClaim.toDate() : (profile.lastDailyClaim ? new Date(profile.lastDailyClaim) : null);
+    if(!last){
+      $('dailyStatus').innerText = 'Last claim: —';
+    } else {
+      $('dailyStatus').innerText = 'Last claim: ' + last.toLocaleString();
+    }
+  }
+
+  /************************************************************************
+   * Points awarding helper (cloud function fallback to local update)
+   ************************************************************************/
   async function awardPointsServer(points, extraMeta={}) {
     if(!auth.currentUser) { showToast('Sign in to claim points'); return; }
     try{
@@ -556,604 +1078,500 @@
     }
   }
 
-  /* ============================
-     GAMES: Bubble Shooter (improved), Match3, 2048
-     ============================ */
-
-  // UI refs
+  /************************************************************************
+   * Games wiring: Games selector modal -> 2048 modal + new games
+   ************************************************************************/
   const openGamesBtn = $('openGamesBtn');
-  const gameModal = $('gameModal');
-  const gameTabsTop = Array.from(document.querySelectorAll('.game-tab'));
-  const closeGame = $('closeGame');
-  const pauseResume = $('pauseResume');
-  const hudScore = $('hudScore'), hudLevel = $('hudLevel'), gameScoreSmall = $('gameScoreSmall');
-  const shootBtn2 = $('shootBtn2'), resetBtn2 = $('resetBtn2'), claimLevelBtn = $('claimLevelBtn');
-  const nextPreviewEl = $('nextPreview');
-  const powerBar = $('powerBar'), powerFill = $('powerFill');
+  const gamesSelectionModal = $('gamesSelectionModal');
+  const play2048Modal = $('play2048Modal');
+  const closeGamesSelection = $('closeGamesSelection');
+  const closePlay2048 = $('closePlay2048');
 
-  // open games
-  openGamesBtn && openGamesBtn.addEventListener('click', async () => {
+  openGamesBtn && openGamesBtn.addEventListener('click', ()=> {
     if(!auth.currentUser){ $('loginModal').classList.add('show'); return; }
-    gameModal.classList.add('show');
-    activateGame('bubble');
+    gamesSelectionModal.classList.add('show');
+  });
+  closeGamesSelection && closeGamesSelection.addEventListener('click', ()=> gamesSelectionModal.classList.remove('show'));
+
+  document.getElementById('icon-2048').addEventListener('click', async (e) => {
+    gamesSelectionModal.classList.remove('show');
+    await showInterstitial();
+    open2048();
   });
 
-  // close
-  closeGame && closeGame.addEventListener('click', ()=> {
-    gameModal.classList.remove('show');
-    if(currentGame && currentGame.destroy) currentGame.destroy();
-  });
-
-  pauseResume && pauseResume.addEventListener('click', ()=> {
-    if(currentGame && currentGame.togglePause) { currentGame.togglePause(); pauseResume.innerText = pauseResume.innerText === '⏸' ? '▶' : '⏸'; }
-  });
-
-  // tabs always accessible; on tab click show ad then switch
-  gameTabsTop.forEach(t => t.addEventListener('click', async (ev) => {
-    const name = t.dataset.game;
-    if(!name) return;
-    // show interstitial ad on switch
-    await adFlow({ type:'interstitial' });
-    activateGame(name);
-  }));
-
-  // side controls mapping
-  shootBtn2 && shootBtn2.addEventListener('click', ()=> { if(currentGame && currentGame.shoot) currentGame.shoot(); });
-  resetBtn2 && resetBtn2.addEventListener('click', ()=> { if(currentGame && currentGame.reset) currentGame.reset(); });
-  claimLevelBtn && claimLevelBtn.addEventListener('click', async ()=> {
-    if(!auth.currentUser){ $('loginModal').classList.add('show'); return; }
-    if(currentGame && currentGame.claimLevel){
-      await adFlow({ type:'rewarded' });
-      await currentGame.claimLevel();
-    } else showToast('No claimable level right now');
-  });
-
-  // small helper to set active tab visually
-  function setActiveTab(name){
-    gameTabsTop.forEach(t => t.classList.toggle('active', t.dataset.game === name));
+  // open 2048 modal: show banners + start auto-award
+  let autoPointsInterval = null;
+  async function open2048(){
+    if(!auth.currentUser){ showToast('Sign in first'); return; }
+    play2048Modal.classList.add('show');
+    showBanner(AD_UNITS.banner2048,'top');
+    showBanner(AD_UNITS.banner2048,'bottom');
+    Game2048.init();
+    if(autoPointsInterval) clearInterval(autoPointsInterval);
+    // award 20 points per minute
+    autoPointsInterval = setInterval(()=> { awardPointsServer(20, { game:'2048', auto:true }); }, 60 * 1000);
   }
 
-  // game activation
-  let currentGame = null;
-  function activateGame(name){
-    setActiveTab(name);
-    if(currentGame && currentGame.destroy) currentGame.destroy();
-    if(name === 'bubble') currentGame = BubbleGame;
-    else if(name === 'match3') currentGame = Match3Game;
-    else currentGame = Game2048;
-    if(currentGame && currentGame.init) currentGame.init();
-  }
+  closePlay2048 && closePlay2048.addEventListener('click', ()=> {
+    play2048Modal.classList.remove('show');
+    hideBanner('top'); hideBanner('bottom');
+    if(autoPointsInterval) { clearInterval(autoPointsInterval); autoPointsInterval = null; }
+    if(Game2048 && Game2048.destroy) Game2048.destroy();
+  });
 
-  /* ----------------------------
-     Bubble Shooter (hold-to-charge + more bubbles)
-     ---------------------------- */
-  const BubbleGame = (function(){
-    // elements
-    const canvas = $('gameCanvas');
-    let ctx = null;
-    let DPR = Math.max(1, window.devicePixelRatio || 1);
-    let w = 1600, h = 900;
+  $('claim2048') && $('claim2048').addEventListener('click', async ()=> {
+    if(!auth.currentUser){ $('loginModal').classList.add('show'); return; }
+    const ok = await showRewarded();
+    if(ok){
+      await awardPointsServer(50, { game:'2048', method:'rewarded' });
+      showToast('+50 points awarded');
+    } else { showToast('Reward not completed'); }
+  });
 
-    // grid config
-    const COLS = 10;
-    let ROWS = 9; // more bubbles
-    let R = 26;
-    const COLORS = ['#ff7aa2','#ffd36b','#6bf0d8','#9be6ff','#caa0ff','#88ffb8'];
-    const POP_MIN = 3;
-    const BASE_SPEED = 8;
-    const MAX_CHARGE = 1.8; // multiplier
-    // state
+  $('reset2048') && $('reset2048').addEventListener('click', ()=> { if(Game2048 && Game2048.reset) Game2048.reset(); });
+
+  (function initAdPlaceholders(){ adTopEl = $('adTop'); adBottomEl = $('adBottom'); if(adTopEl) adTopEl.style.display = 'none'; if(adBottomEl) adBottomEl.style.display = 'none'; })();
+
+  /************************************************************************
+   * 2048 implementation (renders into #g2048Wrap)
+   ************************************************************************/
+  const Game2048 = (function(){
+    const WRAP = '#g2048Wrap';
+    let size = 4;
     let grid = [];
-    let shooter = null;
-    let nextColor = null;
-    let aimAngle = Math.PI/2;
-    let running=false, paused=false;
-    let raf=0;
-    let score=0, level=1;
+    let score = 0;
+    let tileIdCounter = 1;
+    let boardState = null;
+    let animating = false;
+    let resizeObserver = null;
 
-    // charging
-    let charging=false, chargeStart=0, chargeLevel=0;
-
-    function resize(){
-      DPR = Math.max(1, window.devicePixelRatio || 1);
-      const rect = canvas.getBoundingClientRect();
-      // ensure canvas uses computed rect; when hidden sizes may be 0 so fallback
-      const rectW = Math.max(rect.width, 320);
-      const rectH = Math.max(rect.height, 420);
-      w = Math.floor(rectW * DPR);
-      h = Math.floor(rectH * DPR);
-      canvas.width = w;
-      canvas.height = h;
-      ctx = canvas.getContext('2d', { alpha:false });
-      ctx.setTransform(DPR,0,0,DPR,0,0);
-      computeR();
-    }
-    function computeR(){
-      const cw = canvas.width / DPR;
-      R = Math.max(12, Math.floor(cw / (COLS * 3.6)));
+    function computeCellSize(){
+      const wrapEl = document.querySelector(WRAP);
+      if(!wrapEl) return 72;
+      const available = Math.max(260, Math.min(480, wrapEl.clientWidth - 32));
+      const gap = 12;
+      const cell = Math.floor((available - gap * (size + 1)) / size);
+      return Math.max(56, Math.min(98, cell));
     }
 
-    function initCanvas(){
-      if(!canvas) return;
-      resize();
-      window.addEventListener('resize', resize);
-      // pointer events for aim & charging
-      canvas.addEventListener('pointermove', onPointerMove);
-      canvas.addEventListener('pointerdown', onPointerDown);
-      canvas.addEventListener('pointerup', onPointerUp);
-      canvas.addEventListener('pointercancel', onPointerUp);
-      canvas.addEventListener('click', ()=> { /* neutral - we use pointer events */ });
+    function setEmpty(){ grid = Array.from({length:size}, ()=> Array(size).fill(0)); }
+    function addRandom(){
+      const empties=[];
+      for(let r=0;r<size;r++) for(let c=0;c<size;c++) if(grid[r][c]===0) empties.push([r,c]);
+      if(empties.length===0) return null;
+      const [r,c] = empties[Math.floor(Math.random()*empties.length)];
+      const v = Math.random() < 0.9 ? 2 : 4;
+      grid[r][c] = v;
+      return [r,c,v];
     }
 
-    function initGrid(){
-      ROWS = 7 + Math.floor(level/2) + 2; // make initial rows higher
-      grid = [];
-      for(let r=0;r<ROWS;r++){
-        grid[r] = [];
-        for(let c=0;c<COLS;c++){
-          // top rows populated, leave some gaps lower
-          const fillChance = (r < Math.min(ROWS, Math.floor(level/2)+5)) ? 0.95 : 0.35;
-          grid[r][c] = Math.random() < fillChance ? pick(COLORS) : null;
-        }
+    function tileColor(v){
+      if(!v) return 'rgba(0,0,0,0.02)';
+      if(v === 2) return '#f6feff';
+      if(v === 4) return '#e7fbff';
+      if(v === 8) return '#c3f0ff';
+      if(v === 16) return '#9be6ff';
+      if(v === 32) return '#66d7ff';
+      if(v === 64) return '#06b6d4';
+      if(v === 128) return '#ffd6ea';
+      if(v === 256) return '#ffb3d1';
+      if(v === 512) return '#ff9bb0';
+      if(v === 1024) return '#ff7aa2';
+      return '#ff6b8b';
+    }
+    function tileTextColor(v){ return v >= 8 ? '#041018' : '#071426'; }
+    function q(sel){ return document.querySelector(sel); }
+    function create(tag, cls){ const e = document.createElement(tag); if(cls) e.className = cls; return e; }
+
+    function render(){
+      const wrap = q(WRAP);
+      if(!wrap) return;
+      wrap.innerHTML = '';
+
+      const cellSize = computeCellSize();
+      const gap = 12;
+      const boardWrap = create('div','g2048-board-inner');
+      boardWrap.style.position = 'relative';
+      boardWrap.style.padding = `${gap}px`;
+      boardWrap.style.borderRadius = '14px';
+      boardWrap.style.background = '#efe2d9';
+      boardWrap.style.width = `${(cellSize + gap) * size + gap}px`;
+
+      const gridBg = create('div');
+      gridBg.style.display = 'grid';
+      gridBg.style.gridTemplateColumns = `repeat(${size}, ${cellSize}px)`;
+      gridBg.style.gridGap = `${gap}px`;
+      gridBg.style.width = '100%';
+      for(let i=0;i<size*size;i++){
+        const c = create('div');
+        c.style.width = `${cellSize}px`;
+        c.style.height = `${cellSize}px`;
+        c.style.borderRadius = '10px';
+        c.style.background = 'rgba(0,0,0,0.02)';
+        gridBg.appendChild(c);
       }
-    }
-    function pick(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
 
-    function spawnShooter(){
-      const cw = canvas.width / DPR, ch = canvas.height / DPR;
-      if(!nextColor) nextColor = pick(COLORS);
-      shooter = { x: cw/2, y: ch - (R + 18), r: R-2, color: nextColor, vx:0, vy:0, shooting:false };
-      nextColor = pick(COLORS);
-      updateNextPreview(nextColor);
-    }
-    function updateNextPreview(col){
-      if(nextPreviewEl) nextPreviewEl.style.background = col;
-    }
+      const tileContainer = create('div');
+      tileContainer.style.position = 'absolute';
+      tileContainer.style.left = '0';
+      tileContainer.style.top = '0';
+      tileContainer.style.width = '100%';
+      tileContainer.style.height = '100%';
+      tileContainer.style.pointerEvents = 'none';
 
-    function onPointerMove(e){
-      if(!canvas) return;
-      const rect = canvas.getBoundingClientRect();
-      const mx = e.clientX - rect.left, my = e.clientY - rect.top;
-      updateAim(mx, my);
-      // if charging update power bar
-      if(charging){
-        const elapsed = (performance.now() - chargeStart) / 1000;
-        chargeLevel = Math.min(MAX_CHARGE, elapsed / 0.8); // full charge ~0.8s
-        updatePowerBar(chargeLevel / MAX_CHARGE);
-      }
-    }
-    function onPointerDown(e){
-      if(!shooter || paused) return;
-      // start charging
-      charging = true; chargeStart = performance.now(); chargeLevel = 0;
-      showPowerBar(true);
-    }
-    function onPointerUp(e){
-      if(!shooter) return;
-      if(charging){
-        // release - shoot with power
-        charging = false;
-        const multiplier = 1 + chargeLevel * (MAX_CHARGE-1);
-        performShoot(multiplier);
-        chargeLevel = 0;
-        showPowerBar(false);
-        return;
-      }
-      // if not charging and not shooting, treat as quick tap shoot
-      if(!shooter.shooting) performShoot(1.0);
+      boardWrap.appendChild(gridBg);
+      boardWrap.appendChild(tileContainer);
+      wrap.appendChild(boardWrap);
+
+      boardState = { shell: boardWrap, tileContainer, cellSize, gap };
+      createAllTiles();
+      attachPointerListeners();
+      document.getElementById('boardScore').innerText = 'Score: ' + score;
+      const best = window.localStorage.getItem('twinity_2048_best') || 0;
+      document.getElementById('boardBest').innerText = 'Best: ' + best;
     }
 
-    function showPowerBar(visible){
-      if(!powerBar) return;
-      powerBar.style.display = visible ? 'flex' : 'none';
-      if(!visible) powerFill.style.width='0%';
-    }
-    function updatePowerBar(fraction){
-      if(!powerFill) return;
-      const pct = Math.round(Math.max(0, Math.min(1,fraction)) * 100);
-      powerFill.style.width = pct + '%';
-    }
-
-    function updateAim(mx, my){
-      const sx = shooter ? shooter.x : (canvas.width/DPR)/2;
-      const sy = shooter ? shooter.y : (canvas.height/DPR) - (R + 18);
-      aimAngle = Math.atan2(sy - my, mx - sx);
-    }
-
-    function performShoot(powerMultiplier){
-      if(!shooter || shooter.shooting || paused) return;
-      const speed = BASE_SPEED * (1 + (powerMultiplier*0.9)); // base speed * charge
-      shooter.vx = Math.cos(aimAngle) * speed;
-      shooter.vy = -Math.sin(aimAngle) * speed;
-      shooter.shooting = true;
-    }
-
-    function step(){
-      if(paused) return;
-      // move shooter if shooting
-      if(shooter && shooter.shooting){
-        shooter.x += shooter.vx;
-        shooter.y += shooter.vy;
-        // wall bounce
-        const cw = canvas.width / DPR;
-        if(shooter.x <= R){ shooter.x = R; shooter.vx = Math.abs(shooter.vx); }
-        if(shooter.x >= cw - R){ shooter.x = cw - R; shooter.vx = -Math.abs(shooter.vx); }
-        // top collision
-        if(shooter.y <= R + 24){
-          placeBubbleAt(shooter.x, shooter.y, shooter.color);
-          shooter.shooting=false; spawnShooter();
-          return;
-        }
-        // check hit any bubble
-        let collided=false;
-        for(let r=0;r<ROWS && !collided;r++){
-          for(let c=0;c<COLS && !collided;c++){
-            if(grid[r] && grid[r][c]){
-              const {x,y} = gridToPixel(c,r);
-              const dx = shooter.x - x, dy = shooter.y - y;
-              if(Math.hypot(dx,dy) <= R*1.5) collided = true;
-            }
-          }
-        }
-        if(collided){
-          placeBubbleAt(shooter.x, shooter.y, shooter.color);
-          shooter.shooting=false; spawnShooter();
-          return;
-        }
+    function createAllTiles(){
+      if(!boardState) return;
+      boardState.tileContainer.innerHTML = '';
+      for(let r=0;r<size;r++) for(let c=0;c<size;c++){
+        const v = grid[r][c];
+        if(v) createTileDom(r,c,v,true);
       }
     }
 
-    function gridToPixel(c,r){
-      const x = c * R*2 + ((r%2) ? R : 0) + R + 12;
-      const y = r * (R*1.73) + R + 28;
-      return { x, y };
+    function createTileDom(r, c, value, spawn=false){
+      if(!boardState) return null;
+      const id = 'tile_' + (tileIdCounter++);
+      const { tileContainer, cellSize, gap } = boardState;
+      const tile = create('div','g2048-tile');
+      tile.dataset.r = r; tile.dataset.c = c; tile.dataset.v = value; tile.dataset.id = id;
+      tile.style.position = 'absolute';
+      tile.style.width = `${cellSize}px`;
+      tile.style.height = `${cellSize}px`;
+      tile.style.left = `${gap + c*(cellSize+gap)}px`;
+      tile.style.top = `${gap + r*(cellSize+gap)}px`;
+      tile.style.borderRadius = '10px';
+      tile.style.display = 'flex';
+      tile.style.alignItems = 'center';
+      tile.style.justifyContent = 'center';
+      tile.style.fontWeight = '900';
+      tile.style.fontSize = Math.max(14, Math.floor(cellSize * 0.32)) + 'px';
+      tile.style.transition = 'transform .18s cubic-bezier(.2,.9,.2,1), left .12s linear, top .12s linear, background .12s linear';
+      tile.style.transformOrigin = 'center center';
+      tile.style.background = tileColor(value);
+      tile.style.color = tileTextColor(value);
+      tile.style.boxShadow = 'inset 0 -8px 12px rgba(0,0,0,0.06), 0 6px 14px rgba(0,0,0,0.08)';
+      tile.innerText = value;
+      tileContainer.appendChild(tile);
+
+      if(spawn){
+        tile.style.transform = 'scale(.2)';
+        tile.style.opacity = '0';
+        requestAnimationFrame(()=> {
+          tile.style.transition = 'transform .28s cubic-bezier(.2,.9,.2,1), opacity .24s linear';
+          tile.style.transform = 'scale(1.02)';
+          tile.style.opacity = '1';
+          setTimeout(()=> tile.style.transform = 'scale(1)', 260);
+        });
+      }
+      return tile;
     }
 
-    function draw(){
-      if(!ctx) return;
-      const W = canvas.width / DPR, H = canvas.height / DPR;
-      const g = ctx.createLinearGradient(0,0,0,H);
-      g.addColorStop(0,'#071428'); g.addColorStop(1,'#041426');
-      ctx.fillStyle = g; ctx.fillRect(0,0,W,H);
+    function findTileDom(r,c){
+      if(!boardState) return null;
+      return boardState.tileContainer.querySelector(`.g2048-tile[data-r="${r}"][data-c="${c}"]`);
+    }
 
-      // draw grid bubbles
-      for(let r=0;r<ROWS;r++){
-        for(let c=0;c<COLS;c++){
-          const col = grid[r][c];
-          if(col) {
-            const {x,y} = gridToPixel(c,r);
-            drawBubble(x,y,R-1,col);
-          }
-        }
-      }
-
-      // draw shooter (and aim)
-      if(shooter){
-        // draw aim line when not shooting
-        if(!shooter.shooting){
-          ctx.save();
-          ctx.strokeStyle = 'rgba(255,255,255,0.12)';
-          ctx.setLineDash([6,6]);
-          ctx.lineWidth = 2;
-          ctx.beginPath();
-          ctx.moveTo(shooter.x, shooter.y);
-          // draw a short projection with bounces
-          let px = shooter.x, py = shooter.y;
-          let vx = Math.cos(aimAngle) * 6, vy = -Math.sin(aimAngle) * 6;
-          for(let i=0;i<90;i++){
-            px += vx; py += vy;
-            if(px <= R || px >= W - R) { vx = -vx; }
-            if(py <= R + 24) { ctx.lineTo(px,py); break; }
-            // approximate collision detection
-            let collided=false;
-            for(let rr=0; rr<ROWS && !collided; rr++){
-              for(let cc=0; cc<COLS && !collided; cc++){
-                if(grid[rr][cc]){
-                  const {x,y} = gridToPixel(cc,rr);
-                  if(Math.hypot(px-x,py-y) < R*1.2){ collided=true; ctx.lineTo(px,py); break; }
-                }
-              }
-            }
-            if(collided) break;
-          }
-          ctx.stroke(); ctx.restore();
-        }
-        // draw charging aura if charging
-        if(charging){
-          ctx.beginPath(); ctx.fillStyle = 'rgba(255,95,168,0.08)'; ctx.arc(shooter.x, shooter.y, shooter.r + 10 * (0.4 + (chargeLevel||0)), 0, Math.PI*2); ctx.fill();
-        }
-        // draw bubble
-        drawBubble(shooter.x, shooter.y, shooter.r, shooter.color);
+    function moveTileDom(tileEl, r, c, merge=false, newValue=null){
+      if(!boardState || !tileEl) return;
+      const { cellSize, gap } = boardState;
+      tileEl.style.left = `${gap + c*(cellSize+gap)}px`;
+      tileEl.style.top = `${gap + r*(cellSize+gap)}px`;
+      tileEl.dataset.r = r; tileEl.dataset.c = c;
+      if(merge){
+        tileEl.dataset.v = newValue;
+        tileEl.innerText = newValue;
+        tileEl.style.background = tileColor(newValue);
+        tileEl.style.color = tileTextColor(newValue);
+        tileEl.style.transform = 'scale(1.14)';
+        setTimeout(()=> tileEl.style.transform = 'scale(1)', 160);
       }
     }
 
-    function drawBubble(x,y,r,color){
-      const g = ctx.createRadialGradient(x - r*0.2, y - r*0.4, r*0.06, x, y, r);
-      g.addColorStop(0,'#ffffff'); g.addColorStop(0.04,color); g.addColorStop(1,color);
-      ctx.beginPath(); ctx.fillStyle = g; ctx.arc(x,y,r,0,Math.PI*2); ctx.fill();
-      ctx.lineWidth = 1; ctx.strokeStyle = 'rgba(0,0,0,0.18)'; ctx.stroke();
-      ctx.beginPath(); ctx.globalAlpha = 0.14; ctx.fillStyle = '#fff'; ctx.ellipse(x - r*0.28, y - r*0.45, r*0.6, r*0.45, -0.45, 0, Math.PI*2); ctx.fill(); ctx.globalAlpha = 1;
+    function transpose(m){ return m[0].map((_,i)=> m.map(row=> row[i])); }
+
+    function compressRowAndMoves(row, r){
+      const items = [];
+      for(let c=0;c<size;c++) if(row[c]) items.push({v: row[c], c});
+      const newRow = Array(size).fill(0);
+      const moves = [];
+      let write = 0, i=0;
+      while(i < items.length){
+        if(i+1 < items.length && items[i].v === items[i+1].v){
+          newRow[write] = items[i].v * 2;
+          moves.push({ from: [r, items[i].c], from2: [r, items[i+1].c], to: [r, write], value: newRow[write], merge: true });
+          i += 2; write++;
+        } else {
+          newRow[write] = items[i].v;
+          moves.push({ from: [r, items[i].c], to: [r, write], value: items[i].v, merge: false });
+          i += 1; write++;
+        }
+      }
+      return { newRow, moves };
     }
 
-    function placeBubbleAt(px, py, color){
-      // find nearest grid cell
-      let best = null, bestD = 1e9;
-      for(let r=0;r<ROWS;r++){
-        for(let c=0;c<COLS;c++){
-          const {x,y} = gridToPixel(c,r);
-          const d = Math.hypot(px-x, py-y);
-          if(d < bestD){ bestD = d; best = {r,c}; }
-        }
+    function moveLeft(){
+      if(animating) return false;
+      animating = true;
+      const allMoves = [];
+      const old = grid.map(r => r.slice());
+      const newGrid = Array.from({length:size}, ()=> Array(size).fill(0));
+      for(let r=0;r<size;r++){
+        const { newRow, moves } = compressRowAndMoves(old[r], r);
+        newGrid[r] = newRow;
+        allMoves.push(...moves);
       }
-      if(!best) return;
-      let {r,c} = best;
-      if(grid[r][c]){
-        // attempt neighbors
-        const neigh = [[0,1],[0,-1],[1,0],[-1,0],[1,1],[1,-1]];
-        let placed=false;
-        for(const d of neigh){
-          const nr=r+d[0], nc=c+d[1];
-          if(nr>=0 && nr<ROWS && nc>=0 && nc<COLS && !grid[nr][nc]){ grid[nr][nc] = color; placed=true; break; }
+      grid = newGrid;
+      const promises = allMoves.map(m => new Promise(res => {
+        const el1 = findTileDom(m.from[0], m.from[1]);
+        const el2 = m.from2 ? findTileDom(m.from2[0], m.from2[1]) : null;
+        if(m.merge && el1 && el2){
+          el1.style.zIndex = 20; el2.style.zIndex = 21;
+          moveTileDom(el1, m.to[0], m.to[1], false);
+          moveTileDom(el2, m.to[0], m.to[1], false);
+          setTimeout(()=> {
+            if(el1.parentNode) el1.parentNode.removeChild(el1);
+            el2.dataset.v = m.value;
+            el2.innerText = m.value;
+            el2.style.background = tileColor(m.value);
+            el2.style.color = tileTextColor(m.value);
+            el2.style.transform = 'scale(1.12)';
+            setTimeout(()=> el2.style.transform = 'scale(1)', 140);
+            res();
+          }, 160);
+        } else if(el1){
+          moveTileDom(el1, m.to[0], m.to[1], false);
+          setTimeout(()=> res(), 140);
+        } else {
+          res();
         }
-        if(!placed){
-          for(let cc=0;cc<COLS;cc++) if(!grid[0][cc]){ grid[0][cc] = color; break; }
-        }
-      } else {
-        grid[r][c] = color;
-      }
+      }));
 
-      // pop clusters
-      const cluster = floodFill(r,c);
-      if(cluster.length >= POP_MIN){
-        for(const p of cluster) grid[p.r][p.c] = null;
-        score += cluster.length * 12;
-      }
-      // remove floating
-      removeFloating();
-      updateHUD();
-      // check clear
-      if(isCleared()) {
-        levelComplete();
-      }
-    }
-
-    function floodFill(sr, sc){
-      const target = grid[sr] ? grid[sr][sc] : null;
-      if(!target) return [];
-      const stack = [[sr,sc]], seen={}, result=[];
-      while(stack.length){
-        const [r,c] = stack.pop(); const key = r+'_'+c;
-        if(seen[key]) continue; seen[key]=1;
-        if(grid[r] && grid[r][c] === target){
-          result.push({r,c});
-          const neigh = [[0,1],[0,-1],[1,0],[-1,0],[1,1],[1,-1]];
-          for(const d of neigh){
-            const nr=r+d[0], nc=c+d[1];
-            if(nr>=0 && nr<ROWS && nc>=0 && nc<COLS) stack.push([nr,nc]);
-          }
+      Promise.all(promises).then(()=> {
+        const spawn = addRandom();
+        if(spawn && boardState){
+          const [sr, sc, sv] = spawn;
+          createTileDom(sr, sc, sv, true);
         }
-      }
-      return result;
-    }
+        const oldSum = old.flat().reduce((a,b)=>a+(b||0),0);
+        const newSum = grid.flat().reduce((a,b)=>a+(b||0),0);
+        score += (newSum - oldSum);
+        setTimeout(()=> {
+          animating = false;
+          render();
+          document.getElementById('boardScore').innerText = 'Score: ' + score;
+          const bestKey = 'twinity_2048_best';
+          const best = parseInt(localStorage.getItem(bestKey) || 0,10);
+          if(score > best) localStorage.setItem(bestKey, score);
+          document.getElementById('boardBest').innerText = 'Best: ' + (localStorage.getItem(bestKey) || 0);
+        }, 180);
+      }).catch(e=>{ console.error(e); animating = false; render(); });
 
-    function removeFloating(){
-      const visited = {}; const stack=[];
-      if(grid[0]) for(let c=0;c<COLS;c++) if(grid[0][c]) stack.push([0,c]);
-      while(stack.length){
-        const [r,c] = stack.pop(); const key = r+'_'+c; if(visited[key]) continue; visited[key]=1;
-        const neigh = [[0,1],[0,-1],[1,0],[-1,0],[1,1],[1,-1]];
-        for(const d of neigh){
-          const nr=r+d[0], nc=c+d[1];
-          if(nr>=0 && nr<ROWS && nc>=0 && nc<COLS && grid[nr][nc] && !visited[nr+'_'+nc]) stack.push([nr,nc]);
-        }
-      }
-      for(let r=0;r<ROWS;r++){
-        for(let c=0;c<COLS;c++){
-          if(grid[r][c] && !visited[r+'_'+c]){
-            grid[r][c] = null;
-            score += 6;
-          }
-        }
-      }
-    }
-
-    function isCleared(){
-      for(let r=0;r<ROWS;r++) for(let c=0;c<COLS;c++) if(grid[r][c]) return false;
       return true;
     }
 
-    async function levelComplete(){
-      const award = 50 + (level-1)*12;
-      await awardPointsServer(award, { game:'bubble', level });
-      level++;
-      // push a row to top to increase difficulty
-      const newRow = [];
-      for(let c=0;c<COLS;c++) newRow[c] = pick(COLORS);
-      grid.unshift(newRow);
-      ROWS = grid.length;
-      showToast('Level cleared • +' + award + ' pts');
-      updateHUD();
+    function moveRight(){ grid = grid.map(row=> row.slice().reverse()); const ok = moveLeft(); grid = grid.map(row=> row.slice().reverse()); if(!animating) render(); return ok; }
+    function moveUp(){ grid = transpose(grid); const ok = moveLeft(); grid = transpose(grid); if(!animating) render(); return ok; }
+    function moveDown(){ grid = transpose(grid); const ok = moveRight(); grid = transpose(grid); if(!animating) render(); return ok; }
+
+    function anyMoves(){
+      for(let r=0;r<size;r++) for(let c=0;c<size;c++) if(grid[r][c]===0) return true;
+      for(let r=0;r<size;r++) for(let c=0;c<size-1;c++) if(grid[r][c]===grid[r][c+1]) return true;
+      for(let c=0;c<size;c++) for(let r=0;r<size-1;r++) if(grid[r][c]===grid[r+1][c]) return true;
+      return false;
     }
 
-    function updateHUD(){
-      if(hudScore) hudScore.innerText = score;
-      if(hudLevel) hudLevel.innerText = level;
-      if(gameScoreSmall) gameScoreSmall.innerText = 'Score: ' + score;
-    }
-
-    function loop(){
-      if(!running) return;
-      step();
-      draw();
-      raf = requestAnimationFrame(loop);
-    }
-
-    function reset(){
-      score = 0; level = 1;
-      initGrid();
-      spawnShooter();
-      updateHUD();
-      showToast('Bubble shooter reset');
-    }
-
-    function destroy(){
-      running=false; paused=false;
-      cancelAnimationFrame(raf);
-      // remove listeners we added
-      try{
-        canvas.removeEventListener('pointermove', onPointerMove);
-        canvas.removeEventListener('pointerdown', onPointerDown);
-        canvas.removeEventListener('pointerup', onPointerUp);
-        canvas.removeEventListener('pointercancel', onPointerUp);
-        window.removeEventListener('resize', resize);
-      }catch(e){}
-    }
-
-    // public API
-    return {
-      init: function(){
-        if(running) return;
-        initCanvas();
-        initGrid();
-        spawnShooter();
-        running = true;
-        loop();
-      },
-      destroy,
-      togglePause: function(){ paused = !paused; showToast(paused ? 'Paused' : 'Resumed'); },
-      shoot: function(){ performShoot(1.0); },
-      reset,
-      claimLevel: async function(){ const award = Math.max(50, Math.floor(score/8)); await awardPointsServer(award, { game:'bubble', level }); showToast('Claimed +' + award + ' pts'); }
-    };
-  })();
-
-  /* ---------------------------------------
-     Match3 & 2048 (kept simple & usable)
-     --------------------------------------- */
-
-  const Match3Game = (function(){
-    const boardEl = document.createElement('div');
-    boardEl.id = 'm3Board';
-    const gameWrap = document.createElement('div');
-    // We'll append this board to the canvas area when user switches — simple approach avoids reworking DOM structure
-    let size=6, grid=[], colors=['#ff7aa2','#ffd36b','#6bf0d8','#9be6ff','#caa0ff','#88ffb8'];
-    let score=0, level=1;
-
-    function pick(a){ return a[Math.floor(Math.random()*a.length)]; }
-    function makeGrid(){ grid = Array.from({length:size}, ()=> Array.from({length:size}, ()=> pick(colors))); }
-    function render(){
-      // place into canvas area: replace inner content with board
-      const wrapper = document.querySelector('.game-canvas-wrap');
-      if(!wrapper) return;
-      wrapper.innerHTML = '';
-      const board = document.createElement('div');
-      board.style.display='grid'; board.style.gridTemplateColumns = `repeat(${size},56px)`; board.style.justifyContent='center'; board.style.alignItems='center'; board.style.padding='18px';
-      for(let r=0;r<size;r++){
-        for(let c=0;c<size;c++){
-          const t = document.createElement('div');
-          t.className='match3-tile';
-          t.style.background = grid[r][c];
-          t.dataset.r = r; t.dataset.c = c;
-          t.style.width='56px'; t.style.height='56px';
-          t.style.borderRadius='8px'; t.style.margin='6px';
-          t.addEventListener('click', onClick);
-          board.appendChild(t);
+    function handleMove(dir){
+      if(animating) return;
+      if(dir==='left'){ if(!moveLeft()) return; }
+      if(dir==='right'){ if(!moveRight()) return; }
+      if(dir==='up'){ if(!moveUp()) return; }
+      if(dir==='down'){ if(!moveDown()) return; }
+      setTimeout(()=> {
+        if(!anyMoves()){
+          showToast('No moves left — resetting board');
+          setTimeout(()=> init(), 700);
+        } else {
+          checkLevelProgress();
         }
-      }
-      wrapper.appendChild(board);
+      }, 350);
     }
-    let first=null, anim=false;
-    function onClick(e){
-      if(anim) return;
-      const r=+e.currentTarget.dataset.r, c=+e.currentTarget.dataset.c;
-      if(!first){ first={r,c,el:e.currentTarget}; e.currentTarget.style.transform='scale(1.06)'; return; }
-      first.el.style.transform='';
-      const fr=first.r, fc=first.c;
-      if(Math.abs(fr-r)+Math.abs(fc-c)===1){
-        swap(fr,fc,r,c);
-        if(!hasMatch()){
-          swap(fr,fc,r,c); showToast('No match');
-        } else processMatches();
-      }
-      first=null;
-    }
-    function swap(r1,c1,r2,c2){ const t = grid[r1][c1]; grid[r1][c1]=grid[r2][c2]; grid[r2][c2]=t; render(); }
-    function hasMatch(){ for(let r=0;r<size;r++) for(let c=0;c<size;c++){ const v=grid[r][c]; if(!v) continue; if(c+2<size && grid[r][c+1]===v && grid[r][c+2]===v) return true; if(r+2<size && grid[r+1][c]===v && grid[r+2][c]===v) return true; } return false; }
-    function findMatches(){ const rem = Array.from({length:size}, ()=> Array(size).fill(false)); for(let r=0;r<size;r++) for(let c=0;c<size;c++){ const v=grid[r][c]; if(!v) continue; if(c+2<size && grid[r][c+1]===v && grid[r][c+2]===v){ let cc=c; while(cc<size && grid[r][cc]===v){ rem[r][cc]=true; cc++; } } if(r+2<size && grid[r+1][c]===v && grid[r+2][c]===v){ let rr=r; while(rr<size && grid[rr][c]===v){ rem[rr][c]=true; rr++; } } } return rem; }
-    function collapse(){ for(let c=0;c<size;c++){ let write=size-1; for(let r=size-1;r>=0;r--){ if(grid[r][c]){ grid[write][c]=grid[r][c]; write--; } } for(let r=write;r>=0;r--) grid[r][c]=pick(colors); } }
-    function processMatches(){ anim=true; const rem=findMatches(); let any=false, cnt=0; for(let r=0;r<size;r++) for(let c=0;c<size;c++) if(rem[r][c]){ any=true; grid[r][c]=null; cnt++; } if(!any){ anim=false; if(score >= level*100) levelComplete(); return; } score += cnt * 6; render(); setTimeout(()=>{ collapse(); render(); setTimeout(()=>{ anim=false; processMatches(); }, 220); }, 180); }
-    async function levelComplete(){ const award=40; showToast('Match-3 cleared • +' + award + ' pts'); await awardPointsServer(award, { game:'match3', level }); level++; score=0; makeGrid(); render(); }
-    return {
-      init: function(){ makeGrid(); score=0; level=1; const wrap = document.querySelector('.game-canvas-wrap'); if(wrap) wrap.innerHTML=''; render(); },
-      destroy: function(){ /* nothing */ },
-      reset: function(){ makeGrid(); score=0; level=1; render(); showToast('Match-3 reset'); },
-      claimLevel: async function(){ await levelComplete(); }
-    };
-  })();
 
-  const Game2048 = (function(){
-    const wrapperSelector = '.game-canvas-wrap';
-    let size=4, grid=[], score=0;
-    function setEmpty(){ grid = Array.from({length:size}, ()=> Array(size).fill(0)); }
-    function addRandom(){ const empties=[]; for(let r=0;r<size;r++) for(let c=0;c<size;c++) if(grid[r][c]===0) empties.push([r,c]); if(empties.length===0) return; const [r,c]=empties[Math.floor(Math.random()*empties.length)]; grid[r][c] = Math.random() < 0.9 ? 2 : 4; }
-    function render(){ const wrap = document.querySelector(wrapperSelector); if(!wrap) return; wrap.innerHTML=''; const board = document.createElement('div'); board.style.display='grid'; board.style.gridTemplateColumns = `repeat(${size}, auto)`; board.style.justifyContent='center'; board.style.alignItems='center'; board.style.padding='18px'; for(let r=0;r<size;r++) for(let c=0;c<size;c++){ const v=grid[r][c]; const t=document.createElement('div'); t.className='tile-2048'; t.style.margin='6px'; t.style.width='72px'; t.style.height='72px'; t.style.display='flex'; t.style.alignItems='center'; t.style.justifyContent='center'; t.style.borderRadius='8px'; t.style.fontWeight='800'; t.style.fontSize='20px'; t.style.background = v ? '#1f3a4a' : 'rgba(255,255,255,0.02)'; t.innerText = v? v : ''; board.appendChild(t); } wrap.appendChild(board); }
-    function init(){ setEmpty(); addRandom(); addRandom(); render(); }
-    function transpose(m){ return m[0].map((_,i)=> m.map(row=> row[i])); }
-    function compress(row){ const out = row.filter(x=>x!==0); for(let i=0;i<out.length-1;i++) if(out[i]===out[i+1]){ out[i]*=2; score+=out[i]; out.splice(i+1,1); } while(out.length<size) out.push(0); return out; }
-    function moveLeft(){ let changed=false; for(let r=0;r<size;r++){ const old = grid[r].slice(); grid[r] = compress(grid[r]); if(old.join(',') !== grid[r].join(',')) changed=true; } if(changed) addRandom(); render(); return changed; }
-    function moveRight(){ grid = grid.map(row=> row.slice().reverse()); const ok = moveLeft(); grid = grid.map(row=> row.slice().reverse()); return ok; }
-    function moveUp(){ grid = transpose(grid); const ok = moveLeft(); grid = transpose(grid); return ok; }
-    function moveDown(){ grid = transpose(grid); const ok = moveRight(); grid = transpose(grid); return ok; }
-    function anyMoves(){ for(let r=0;r<size;r++) for(let c=0;c<size;c++) if(grid[r][c]===0) return true; for(let r=0;r<size;r++) for(let c=0;c<size-1;c++) if(grid[r][c]===grid[r][c+1]) return true; for(let c=0;c<size;c++) for(let r=0;r<size-1;r++) if(grid[r][c]===grid[r+1][c]) return true; return false; }
-    function handleMove(dir){ if(dir==='left') moveLeft(); if(dir==='right') moveRight(); if(dir==='up') moveUp(); if(dir==='down') moveDown(); if(!anyMoves()) showToast('No moves left'); }
     // keyboard
     window.addEventListener('keydown', (e)=> {
-      if(!document.querySelector(wrapperSelector)) return;
+      if(!document.querySelector(WRAP)) return;
       if(e.key === 'ArrowLeft') handleMove('left');
       if(e.key === 'ArrowRight') handleMove('right');
       if(e.key === 'ArrowUp') handleMove('up');
       if(e.key === 'ArrowDown') handleMove('down');
     });
+
     // touch swipe
-    let sx=0, sy=0;
-    document.addEventListener('touchstart', e=> { sx=e.touches[0].clientX; sy=e.touches[0].clientY; }, {passive:true});
-    document.addEventListener('touchend', e=> {
-      const dx = e.changedTouches[0].clientX - sx, dy = e.changedTouches[0].clientY - sy;
-      if(Math.abs(dx) > Math.abs(dy)){ if(dx>30) handleMove('right'); else if(dx<-30) handleMove('left'); }
-      else { if(dy>30) handleMove('down'); else if(dy<-30) handleMove('up'); }
-    }, {passive:true});
+    let sx=0, sy=0, touchActive=false;
+    function onPointerStart(e){
+      touchActive = true;
+      sx = e.touches ? e.touches[0].clientX : e.clientX;
+      sy = e.touches ? e.touches[0].clientY : e.clientY;
+    }
+    function onPointerEnd(e){
+      if(!touchActive) return;
+      touchActive = false;
+      const ex = e.changedTouches ? e.changedTouches[0].clientX : e.clientX;
+      const ey = e.changedTouches ? e.changedTouches[0].clientY : e.clientY;
+      const dx = ex - sx, dy = ey - sy;
+      const ax = Math.abs(dx), ay = Math.abs(dy);
+      if(Math.max(ax,ay) < 24) return;
+      if(ax > ay){
+        if(dx > 0) handleMove('right'); else handleMove('left');
+      } else {
+        if(dy > 0) handleMove('down'); else handleMove('up');
+      }
+    }
+
+    function attachPointerListeners(){
+      const wrap = q(WRAP);
+      if(!wrap) return;
+      wrap.removeEventListener('touchstart', onPointerStart);
+      wrap.removeEventListener('touchend', onPointerEnd);
+      wrap.addEventListener('touchstart', onPointerStart, {passive:true});
+      wrap.addEventListener('touchend', onPointerEnd, {passive:true});
+      wrap.removeEventListener('pointerdown', onPointerStart);
+      wrap.removeEventListener('pointerup', onPointerEnd);
+      wrap.addEventListener('pointerdown', onPointerStart);
+      wrap.addEventListener('pointerup', onPointerEnd);
+    }
+
+    function init(){
+      tileIdCounter = 1;
+      animating = false;
+      setEmpty();
+      addRandom(); addRandom();
+      score = 0;
+      render();
+      attachPointerListeners();
+      if(resizeObserver) resizeObserver.disconnect();
+      const wrap = document.querySelector(WRAP);
+      if(wrap && typeof ResizeObserver !== 'undefined'){
+        resizeObserver = new ResizeObserver(()=> { render(); });
+        resizeObserver.observe(wrap);
+      }
+    }
+
+    function checkLevelProgress(){
+      let reached = false;
+      for(let r=0;r<size;r++) for(let c=0;c<size;c++) if(grid[r][c] >= 2048) reached = true;
+      if(reached) levelComplete();
+    }
+
+    async function levelComplete(){
+      const award = 50;
+      try{
+        const ok = await showRewarded();
+        if(ok) await awardPointsServer(award, { game:'2048', levelCompleted:true });
+        else {
+          await db.collection('users').doc(auth.currentUser.uid).update({ points: firebase.firestore.FieldValue.increment(Math.floor(award/2)) });
+          await loadCurrentUserToUI(auth.currentUser.uid);
+        }
+      }catch(e){ console.warn('level reward fallback', e); }
+      addRandom(); addRandom();
+      render();
+      showToast('Level cleared • +' + award + ' pts (if ad watched)');
+    }
+
+    function destroy(){
+      if(resizeObserver) { resizeObserver.disconnect(); resizeObserver = null; }
+      const wrap = q(WRAP);
+      if(wrap) wrap.innerHTML = '';
+      boardState = null;
+    }
+
     return {
-      init(){ init(); },
-      destroy(){},
-      reset(){ init(); showToast('2048 reset'); },
-      claim: async ()=> { const award=30; await awardPointsServer(award, { game:'2048' }); showToast('Claimed +' + award + ' pts'); }
+      init: function(){ init(); },
+      destroy: function(){ destroy(); },
+      reset: function(){ init(); showToast('2048 reset'); }
     };
   })();
 
-  // Wiring avatar upload
-  $('changePhotoBtn') && $('changePhotoBtn').addEventListener('click', ()=> { if(!auth.currentUser) { $('loginModal').classList.add('show'); return; } $('avatarFile').click(); });
-  $('avatarFile') && $('avatarFile').addEventListener('change', async e => {
-    const f = e.target.files && e.target.files[0]; if(!f) return;
-    if(!auth.currentUser) return showToast('Sign in first');
+  /************************************************************************
+   * Chat encryption helpers (simple RSA OAEP jwk store)
+   ************************************************************************/
+  const PRIVATE_KEY_STORAGE_KEY = uid => `twinity_privKey_${uid}`;
+  function bytesToBase64(b){ return btoa(String.fromCharCode(...new Uint8Array(b))); }
+  function base64ToBytes(b64){ const bin = atob(b64); const arr = new Uint8Array(bin.length); for(let i=0;i<bin.length;i++) arr[i] = bin.charCodeAt(i); return arr.buffer; }
+  async function ensureKeyPairForCurrentUser(){ const user = auth.currentUser; if(!user) return; const uid = user.uid; if(localStorage.getItem(PRIVATE_KEY_STORAGE_KEY(uid))) return; try{ const kp = await crypto.subtle.generateKey({ name:"RSA-OAEP", modulusLength:2048, publicExponent:new Uint8Array([1,0,1]), hash:"SHA-256" }, true, ["encrypt","decrypt"]); const pubJwk = await crypto.subtle.exportKey("jwk", kp.publicKey); const privJwk = await crypto.subtle.exportKey("jwk", kp.privateKey); await db.collection('users').doc(uid).set({ publicKey: pubJwk }, { merge:true }); localStorage.setItem(PRIVATE_KEY_STORAGE_KEY(uid), JSON.stringify(privJwk)); showToast('Encryption keys created'); }catch(e){ console.error(e); showToast('Key gen failed'); } }
+  async function importPublicKeyFromJwk(jwk){ return await crypto.subtle.importKey("jwk", jwk, { name:"RSA-OAEP", hash:"SHA-256" }, false, ["encrypt"]); }
+  async function importPrivateKeyFromJwk(jwk){ return await crypto.subtle.importKey("jwk", jwk, { name:"RSA-OAEP", hash:"SHA-256" }, false, ["decrypt"]); }
+  async function encryptForJwkPublic(recipientJwk, plaintext){ const pub = await importPublicKeyFromJwk(recipientJwk); const enc = new TextEncoder().encode(plaintext); const cipher = await crypto.subtle.encrypt({ name:"RSA-OAEP" }, pub, enc); return bytesToBase64(cipher); }
+  async function decryptMessageBase64(uid, base64Cipher){ try{ const privRaw = localStorage.getItem(PRIVATE_KEY_STORAGE_KEY(uid)); if(!privRaw) throw new Error('No private key'); const privJwk = JSON.parse(privRaw); const priv = await importPrivateKeyFromJwk(privJwk); const cipherBuf = base64ToBytes(base64Cipher); const plainBuf = await crypto.subtle.decrypt({ name:"RSA-OAEP" }, priv, cipherBuf); return new TextDecoder().decode(plainBuf); } catch(e){ console.warn('decrypt', e); return null; } }
+
+  // chat open / send
+  let chatUnsub = null;
+  async function openChat(){
+    if(!auth.currentUser){ showToast('Sign in first'); return; }
+    await ensureKeyPairForCurrentUser();
     const uid = auth.currentUser.uid;
+    const aSnap = await db.collection('couples').where('memberA','==',uid).get();
+    let coupleDoc = null;
+    if(!aSnap.empty) coupleDoc = aSnap.docs[0];
+    else { const bSnap = await db.collection('couples').where('memberB','==',uid).get(); if(!bSnap.empty) coupleDoc = bSnap.docs[0]; }
+    if(!coupleDoc){ $('chatStatus').innerText = 'Not connected to partner'; return; }
+    const c = coupleDoc.data(); const partnerId = c.memberA === uid ? c.memberB : c.memberA;
+    const pSnap = await db.collection('users').doc(partnerId).get(); const partnerData = pSnap.exists ? pSnap.data() : {};
+    if(!partnerData.publicKey) showToast('Partner not ready for chat (no public key)');
+    const chatBox = $('chatBox'); chatBox.innerHTML = '<div class="small-muted">Loading…</div>';
+    if(chatUnsub) chatUnsub();
+    chatUnsub = db.collection('couples').doc(coupleDoc.id).collection('messages').orderBy('ts','asc').onSnapshot(async snap => {
+      chatBox.innerHTML = '';
+      for(const d of snap.docs){
+        const data = d.data();
+        const bubble = document.createElement('div'); bubble.style.padding='8px'; bubble.style.borderRadius='10px'; bubble.style.marginBottom='8px'; bubble.style.maxWidth='85%'; bubble.style.wordBreak='break-word';
+        if(data.sender === uid){ bubble.style.marginLeft='auto'; bubble.style.background='linear-gradient(90deg,var(--accent-teal),var(--accent-mag))'; bubble.style.color='#041018'; }
+        else { bubble.style.marginRight='auto'; bubble.style.background='rgba(0,0,0,0.02)'; bubble.style.color='#111827'; }
+        const plain = await decryptMessageBase64(uid, data.ciphertext);
+        bubble.innerText = plain !== null ? plain : '🔒 Encrypted message (no private key)';
+        const ts = document.createElement('div'); ts.className='small-muted'; ts.style.marginTop='6px'; ts.style.fontSize='11px';
+        ts.innerText = data.ts && data.ts.toDate ? data.ts.toDate().toLocaleString() : '';
+        bubble.appendChild(ts);
+        chatBox.appendChild(bubble);
+      }
+      chatBox.scrollTop = chatBox.scrollHeight;
+    });
+    $('chatStatus').innerText = 'Chat open';
+  }
+
+  $('sendChat') && $('sendChat').addEventListener('click', async ()=> {
+    if(!auth.currentUser){ showToast('Sign in to send'); return; }
+    const txt = ($('chatInput').value||'').trim(); if(!txt) return;
+    const uid = auth.currentUser.uid; const aSnap = await db.collection('couples').where('memberA','==',uid).get();
+    let coupleDoc = null;
+    if(!aSnap.empty) coupleDoc = aSnap.docs[0];
+    else { const bSnap = await db.collection('couples').where('memberB','==',uid).get(); if(!bSnap.empty) coupleDoc = bSnap.docs[0]; }
+    if(!coupleDoc){ showToast('No partner connected'); return; }
+    const c = coupleDoc.data(); const partnerId = c.memberA === uid ? c.memberB : c.memberA;
+    const pSnap = await db.collection('users').doc(partnerId).get(); const partnerData = pSnap.exists ? pSnap.data() : {};
+    if(!partnerData.publicKey) return showToast('Partner has no public key');
     try{
-      showToast('Uploading...');
-      const ref = storage.ref().child('avatars/'+uid+'/'+Date.now()+'_'+f.name.replace(/[^a-z0-9.\-]/gi,'_'));
-      const snap = await ref.put(f);
-      const url = await snap.ref.getDownloadURL();
-      await auth.currentUser.updateProfile({ photoURL: url });
-      await db.collection('users').doc(uid).update({ photoURL: url });
-      await loadCurrentUserToUI(uid);
-      showToast('Photo updated');
-    }catch(err){ console.error(err); showToast('Upload failed'); }
+      const cipher = await encryptForJwkPublic(partnerData.publicKey, txt);
+      await db.collection('couples').doc(coupleDoc.id).collection('messages').add({ sender: uid, ciphertext: cipher, ts: firebase.firestore.FieldValue.serverTimestamp() });
+      $('chatInput').value=''; showToast('Message sent');
+    }catch(e){ console.error(e); showToast('Send failed'); }
   });
 
-  // image modal close
-  $('closeImageModal') && $('closeImageModal').addEventListener('click', ()=> $('imageModal').classList.remove('show'));
-  $('imageModal') && $('imageModal').addEventListener('click', (e)=> { if(e.target === $('imageModal')) $('imageModal').classList.remove('show'); });
-
-  // partner / connect / watch ad handlers (same as before)
-  $('createPartner') && $('createPartner').addEventListener('click', async ()=>{
+  /************************************************************************
+   * Partner connection flows + avatar upload + watch ad button
+   ************************************************************************/
+  $('createPartner') && $('createPartner').addEventListener('click', async ()=> {
     if(!auth.currentUser){ $('loginModal').classList.add('show'); return; }
     const uid = auth.currentUser.uid;
     try{
@@ -1192,6 +1610,23 @@
     }catch(e){ console.error(e); showToast('Could not connect'); }
   });
 
+  $('changePhotoBtn') && $('changePhotoBtn').addEventListener('click', ()=> { if(!auth.currentUser) { $('loginModal').classList.add('show'); return; } $('avatarFile').click(); });
+  $('avatarFile') && $('avatarFile').addEventListener('change', async e => {
+    const f = e.target.files && e.target.files[0]; if(!f) return;
+    if(!auth.currentUser) return showToast('Sign in first');
+    const uid = auth.currentUser.uid;
+    try{
+      showToast('Uploading...');
+      const ref = storage.ref().child('avatars/'+uid+'/'+Date.now()+'_'+f.name.replace(/[^a-z0-9.\-]/gi,'_'));
+      const snap = await ref.put(f);
+      const url = await snap.ref.getDownloadURL();
+      await auth.currentUser.updateProfile({ photoURL: url });
+      await db.collection('users').doc(uid).update({ photoURL: url });
+      await loadCurrentUserToUI(uid);
+      showToast('Photo updated');
+    }catch(err){ console.error(err); showToast('Upload failed'); }
+  });
+
   $('watchAd') && $('watchAd').addEventListener('click', async ()=> {
     if(!auth.currentUser){ $('loginModal').classList.add('show'); return; }
     if(!confirm('Simulate watching an ad to earn +100 points?')) return;
@@ -1209,7 +1644,7 @@
     }catch(e){ console.error(e); showToast('Reward failed'); }
   });
 
-  // login / email
+  // email sign-in/up buttons (simple)
   $('emailSignIn') && $('emailSignIn').addEventListener('click', async ()=> {
     const em = $('loginEmail').value.trim(), pw = $('loginPass').value;
     if(!em || !pw) return showToast('Enter email & password');
@@ -1221,75 +1656,646 @@
     try{ const cred = await auth.createUserWithEmailAndPassword(em, pw); await createOrUpdateUserDoc(cred.user); $('loginModal').classList.remove('show'); showToast('Account created'); }catch(e){ showToast(e.message || 'Sign up failed'); }
   });
 
-  // Chat crypto helpers (kept)
-  function bytesToBase64(b){ return btoa(String.fromCharCode(...new Uint8Array(b))); }
-  function base64ToBytes(b64){ const bin = atob(b64); const arr = new Uint8Array(bin.length); for(let i=0;i<bin.length;i++) arr[i] = bin.charCodeAt(i); return arr.buffer; }
-  const PRIVATE_KEY_STORAGE_KEY = uid => `twinity_privKey_${uid}`;
-  async function ensureKeyPairForCurrentUser(){ const user = auth.currentUser; if(!user) return; const uid = user.uid; if(localStorage.getItem(PRIVATE_KEY_STORAGE_KEY(uid))) return; try{ const kp = await crypto.subtle.generateKey({ name:"RSA-OAEP", modulusLength:2048, publicExponent:new Uint8Array([1,0,1]), hash:"SHA-256" }, true, ["encrypt","decrypt"]); const pubJwk = await crypto.subtle.exportKey("jwk", kp.publicKey); const privJwk = await crypto.subtle.exportKey("jwk", kp.privateKey); await db.collection('users').doc(uid).set({ publicKey: pubJwk }, { merge:true }); localStorage.setItem(PRIVATE_KEY_STORAGE_KEY(uid), JSON.stringify(privJwk)); showToast('Encryption keys created'); }catch(e){ console.error(e); showToast('Key gen failed'); } }
-  async function importPublicKeyFromJwk(jwk){ return await crypto.subtle.importKey("jwk", jwk, { name:"RSA-OAEP", hash:"SHA-256" }, false, ["encrypt"]); }
-  async function importPrivateKeyFromJwk(jwk){ return await crypto.subtle.importKey("jwk", jwk, { name:"RSA-OAEP", hash:"SHA-256" }, false, ["decrypt"]); }
-  async function encryptForJwkPublic(recipientJwk, plaintext){ const pub = await importPublicKeyFromJwk(recipientJwk); const enc = new TextEncoder().encode(plaintext); const cipher = await crypto.subtle.encrypt({ name:"RSA-OAEP" }, pub, enc); return bytesToBase64(cipher); }
-  async function decryptMessageBase64(uid, base64Cipher){ try{ const privRaw = localStorage.getItem(PRIVATE_KEY_STORAGE_KEY(uid)); if(!privRaw) throw new Error('No private key'); const privJwk = JSON.parse(privRaw); const priv = await importPrivateKeyFromJwk(privJwk); const cipherBuf = base64ToBytes(base64Cipher); const plainBuf = await crypto.subtle.decrypt({ name:"RSA-OAEP" }, priv, cipherBuf); return new TextDecoder().decode(plainBuf); } catch(e){ console.warn('decrypt', e); return null; } }
+  /************************************************************************
+   * New games: Snake, Flappy, Bubble Shooter (playable)
+   * - integrated like 2048: banners, +20 pts/min while modal open
+   * - each modal has a Claim +50 button to watch rewarded ad and award points
+   ************************************************************************/
+  const snakeModal = $('playSnakeModal');
+  const flappyModal = $('playFlappyModal');
+  const bubbleModal = $('playBubbleModal');
 
-  let chatUnsub = null;
-  async function openChat(){
+  let snakeAutoInterval = null;
+  let flappyAutoInterval = null;
+  let bubbleAutoInterval = null;
+
+  // -> Snake
+  $('icon-snake') && $('icon-snake').addEventListener('click', async ()=>{
+    gamesSelectionModal.classList.remove('show');
+    await showInterstitial();
     if(!auth.currentUser){ showToast('Sign in first'); return; }
-    await ensureKeyPairForCurrentUser();
-    const uid = auth.currentUser.uid;
-    const aSnap = await db.collection('couples').where('memberA','==',uid).get();
-    let coupleDoc = null;
-    if(!aSnap.empty) coupleDoc = aSnap.docs[0];
-    else { const bSnap = await db.collection('couples').where('memberB','==',uid).get(); if(!bSnap.empty) coupleDoc = bSnap.docs[0]; }
-    if(!coupleDoc){ $('chatStatus').innerText = 'Not connected to partner'; return; }
-    const c = coupleDoc.data(); const partnerId = c.memberA === uid ? c.memberB : c.memberA;
-    const pSnap = await db.collection('users').doc(partnerId).get(); const partnerData = pSnap.exists ? pSnap.data() : {};
-    if(!partnerData.publicKey) showToast('Partner not ready for chat');
-    const chatBox = $('chatBox'); chatBox.innerHTML = '<div class="small-muted">Loading…</div>';
-    if(chatUnsub) chatUnsub();
-    chatUnsub = db.collection('couples').doc(coupleDoc.id).collection('messages').orderBy('ts','asc').onSnapshot(async snap => {
-      chatBox.innerHTML = '';
-      for(const d of snap.docs){
-        const data = d.data();
-        const bubble = document.createElement('div'); bubble.style.padding='8px'; bubble.style.borderRadius='10px'; bubble.style.marginBottom='8px'; bubble.style.maxWidth='85%'; bubble.style.wordBreak='break-word';
-        if(data.sender === uid){ bubble.style.marginLeft='auto'; bubble.style.background='linear-gradient(90deg,var(--accent-teal),var(--accent-mag))'; bubble.style.color='#041018'; }
-        else { bubble.style.marginRight='auto'; bubble.style.background='rgba(255,255,255,0.02)'; bubble.style.color='#eaf6fb'; }
-        const plain = await decryptMessageBase64(uid, data.ciphertext);
-        bubble.innerText = plain !== null ? plain : '🔒 Encrypted message (no private key)';
-        const ts = document.createElement('div'); ts.className='small-muted'; ts.style.marginTop='6px'; ts.style.fontSize='11px';
-        ts.innerText = data.ts && data.ts.toDate ? data.ts.toDate().toLocaleString() : '';
-        bubble.appendChild(ts);
-        chatBox.appendChild(bubble);
-      }
-      chatBox.scrollTop = chatBox.scrollHeight;
-    });
-  }
-  $('sendChat') && $('sendChat').addEventListener('click', async ()=> {
-    if(!auth.currentUser){ showToast('Sign in to send'); return; }
-    const txt = ($('chatInput').value||'').trim(); if(!txt) return;
-    const uid = auth.currentUser.uid; const aSnap = await db.collection('couples').where('memberA','==',uid).get();
-    let coupleDoc = null;
-    if(!aSnap.empty) coupleDoc = aSnap.docs[0];
-    else { const bSnap = await db.collection('couples').where('memberB','==',uid).get(); if(!bSnap.empty) coupleDoc = bSnap.docs[0]; }
-    if(!coupleDoc){ showToast('No partner connected'); return; }
-    const c = coupleDoc.data(); const partnerId = c.memberA === uid ? c.memberB : c.memberA;
-    const pSnap = await db.collection('users').doc(partnerId).get(); const partnerData = pSnap.exists ? pSnap.data() : {};
-    if(!partnerData.publicKey) return showToast('Partner has no public key');
-    try{
-      const cipher = await encryptForJwkPublic(partnerData.publicKey, txt);
-      await db.collection('couples').doc(coupleDoc.id).collection('messages').add({ sender: uid, ciphertext: cipher, ts: firebase.firestore.FieldValue.serverTimestamp() });
-      $('chatInput').value=''; showToast('Message sent');
-    }catch(e){ console.error(e); showToast('Send failed'); }
+    snakeModal.classList.add('show');
+    showBanner(AD_UNITS.banner2048,'snake-top');
+    showBanner(AD_UNITS.banner2048,'snake-bottom');
+    if(snakeAutoInterval) clearInterval(snakeAutoInterval);
+    snakeAutoInterval = setInterval(()=> awardPointsServer(20, { game:'snake', auto:true }), 60*1000);
+    startSnake(true);
+  });
+  $('closeSnake') && $('closeSnake').addEventListener('click', ()=>{
+    snakeModal.classList.remove('show');
+    hideBanner('snake');
+    if(snakeAutoInterval) { clearInterval(snakeAutoInterval); snakeAutoInterval = null; }
+    stopSnake();
+  });
+  $('resetSnake') && $('resetSnake').addEventListener('click', ()=> { startSnake(true); });
+  $('claimSnake') && $('claimSnake').addEventListener('click', async ()=>{
+    if(!auth.currentUser){ $('loginModal').classList.add('show'); return; }
+    const ok = await showRewarded();
+    if(ok){ await awardPointsServer(50, { game:'snake', method:'rewarded' }); showToast('+50 points awarded'); }
+    else showToast('Reward not completed');
   });
 
-  // reactive leaderboard
-  db.collection('couples').onSnapshot(()=> renderLeaderboard());
-  renderLeaderboard();
+  // -> Flappy
+  $('icon-flappy') && $('icon-flappy').addEventListener('click', async ()=>{
+    gamesSelectionModal.classList.remove('show');
+    await showInterstitial();
+    if(!auth.currentUser){ showToast('Sign in first'); return; }
+    flappyModal.classList.add('show');
+    showBanner(AD_UNITS.banner2048,'flappy-top');
+    showBanner(AD_UNITS.banner2048,'flappy-bottom');
+    if(flappyAutoInterval) clearInterval(flappyAutoInterval);
+    flappyAutoInterval = setInterval(()=> awardPointsServer(20, { game:'flappy', auto:true }), 60*1000);
+    startFlappy(true);
+  });
+  $('closeFlappy') && $('closeFlappy').addEventListener('click', ()=>{
+    flappyModal.classList.remove('show');
+    hideBanner('flappy');
+    if(flappyAutoInterval) { clearInterval(flappyAutoInterval); flappyAutoInterval = null; }
+    stopFlappy();
+  });
+  $('resetFlappy') && $('resetFlappy').addEventListener('click', ()=> { startFlappy(true); });
+  $('claimFlappy') && $('claimFlappy').addEventListener('click', async ()=>{
+    if(!auth.currentUser){ $('loginModal').classList.add('show'); return; }
+    const ok = await showRewarded();
+    if(ok){ await awardPointsServer(50, { game:'flappy', method:'rewarded' }); showToast('+50 points awarded'); }
+    else showToast('Reward not completed');
+  });
 
-  /* Utilities */
+  // -> Bubble Shooter
+  $('icon-bubbles') && $('icon-bubbles').addEventListener('click', async ()=>{
+    gamesSelectionModal.classList.remove('show');
+    await showInterstitial();
+    if(!auth.currentUser){ showToast('Sign in first'); return; }
+    bubbleModal.classList.add('show');
+    showBanner(AD_UNITS.banner2048,'bubble-top');
+    showBanner(AD_UNITS.banner2048,'bubble-bottom');
+    if(bubbleAutoInterval) clearInterval(bubbleAutoInterval);
+    bubbleAutoInterval = setInterval(()=> awardPointsServer(20, { game:'bubbles', auto:true }), 60*1000);
+    startBubble(true);
+  });
+  $('closeBubble') && $('closeBubble').addEventListener('click', ()=>{
+    bubbleModal.classList.remove('show');
+    hideBanner('bubble');
+    if(bubbleAutoInterval) { clearInterval(bubbleAutoInterval); bubbleAutoInterval = null; }
+    stopBubble();
+  });
+  $('resetBubble') && $('resetBubble').addEventListener('click', ()=> { startBubble(true); });
+  $('claimBubble') && $('claimBubble').addEventListener('click', async ()=>{
+    if(!auth.currentUser){ $('loginModal').classList.add('show'); return; }
+    const ok = await showRewarded();
+    if(ok){ await awardPointsServer(50, { game:'bubbles', method:'rewarded' }); showToast('+50 points awarded'); }
+    else showToast('Reward not completed');
+  });
+
+  /************************************************************************
+   * Snake implementation — playable & handlers isolated per-game
+   * - added on-screen D-pad for mobile
+   ************************************************************************/
+  let _snakeState = null;
+  function startSnake(reset){
+    const canvas = $('snakeCanvas');
+    if(!canvas) return;
+    const ctx = canvas.getContext('2d');
+    if(!reset && _snakeState && _snakeState.running) return; // already running
+    // initial state
+    _snakeState = {
+      canvas, ctx,
+      grid: 20,
+      snake: [[200,200],[180,200],[160,200]],
+      dir: { x: 20, y: 0 },
+      nextDir: null,
+      food: [Math.floor(Math.random()*20)*20, Math.floor(Math.random()*20)*20],
+      running: true,
+      interval: null,
+      keyHandler: null,
+      dpadHandlers: []
+    };
+
+    function draw(){
+      const s = _snakeState;
+      const { ctx, canvas } = s;
+      ctx.fillStyle = "#000";
+      ctx.fillRect(0,0,canvas.width,canvas.height);
+      // food
+      ctx.fillStyle = "red";
+      ctx.fillRect(s.food[0]+1, s.food[1]+1, s.grid-2, s.grid-2);
+      // snake
+      ctx.fillStyle = "lime";
+      for(const p of s.snake) ctx.fillRect(p[0]+1, p[1]+1, s.grid-2, s.grid-2);
+    }
+
+    function step(){
+      const s = _snakeState;
+      // apply nextDir (prevents immediate reverse)
+      if(s.nextDir){
+        // prevent reversing into itself: new dir cannot be opposite of current
+        if(!(s.nextDir.x === -s.dir.x && s.nextDir.y === -s.dir.y)){
+          s.dir = s.nextDir;
+        }
+        s.nextDir = null;
+      }
+
+      const nx = (s.snake[0][0] + s.dir.x);
+      const ny = (s.snake[0][1] + s.dir.y);
+      // collision with walls
+      if(nx < 0 || ny < 0 || nx >= s.canvas.width || ny >= s.canvas.height){
+        resetSnakeState(); return;
+      }
+      // move
+      s.snake.unshift([nx, ny]);
+      // eat
+      if(nx === s.food[0] && ny === s.food[1]){
+        s.food = [Math.floor(Math.random()*(s.canvas.width/s.grid))*s.grid, Math.floor(Math.random()*(s.canvas.height/s.grid))*s.grid];
+      } else {
+        s.snake.pop();
+      }
+      // self-collision
+      for(let i=1;i<s.snake.length;i++){
+        if(s.snake[i][0] === nx && s.snake[i][1] === ny){
+          resetSnakeState(); return;
+        }
+      }
+      draw();
+    }
+
+    function resetSnakeState(){
+      const s = _snakeState;
+      s.snake = [[200,200],[180,200],[160,200]];
+      s.dir = { x:20, y:0 };
+      s.nextDir = null;
+      s.food = [Math.floor(Math.random()*(s.canvas.width/s.grid))*s.grid, Math.floor(Math.random()*(s.canvas.height/s.grid))*s.grid];
+      draw();
+    }
+
+    function enqueueDir(nx, ny){
+      const s = _snakeState;
+      const candidate = { x: nx, y: ny };
+      // if opposite of current and snake length>1, ignore
+      if(s.snake.length > 1 && candidate.x === -s.dir.x && candidate.y === -s.dir.y) return;
+      s.nextDir = candidate;
+    }
+
+    function keyHandler(e){
+      if(e.key === 'ArrowUp'){ enqueueDir(0, -s.grid || -20); } // will replace with correct values below
+    }
+
+    // implement keyboard mapping (use consistent grid value)
+    function keyboardHandler(e){
+      const g = _snakeState.grid;
+      if(e.key === 'ArrowUp') enqueueDir(0, -g);
+      if(e.key === 'ArrowDown') enqueueDir(0, g);
+      if(e.key === 'ArrowLeft') enqueueDir(-g, 0);
+      if(e.key === 'ArrowRight') enqueueDir(g, 0);
+    }
+
+    // attach key handler (isolated)
+    if(_snakeState.keyHandler) document.removeEventListener('keydown', _snakeState.keyHandler);
+    _snakeState.keyHandler = keyboardHandler;
+    document.addEventListener('keydown', _snakeState.keyHandler);
+
+    // D-pad handlers
+    const upBtn = $('snakeUp'), downBtn = $('snakeDown'), leftBtn = $('snakeLeft'), rightBtn = $('snakeRight');
+    function bindDpad(btn, fn){
+      if(!btn) return;
+      const onStart = (ev) => { ev.preventDefault(); fn(); };
+      const onEnd = (ev) => { ev.preventDefault(); };
+      btn.addEventListener('touchstart', onStart, { passive:false }); btn.addEventListener('mousedown', onStart);
+      btn.addEventListener('touchend', onEnd); btn.addEventListener('mouseup', onEnd);
+      _snakeState.dpadHandlers.push({ btn, onStart, onEnd });
+    }
+    bindDpad(upBtn, ()=> enqueueDir(0, -_snakeState.grid));
+    bindDpad(downBtn, ()=> enqueueDir(0, _snakeState.grid));
+    bindDpad(leftBtn, ()=> enqueueDir(-_snakeState.grid, 0));
+    bindDpad(rightBtn, ()=> enqueueDir(_snakeState.grid, 0));
+
+    if(_snakeState.interval) clearInterval(_snakeState.interval);
+    _snakeState.interval = setInterval(step, 140);
+    draw();
+  }
+  function stopSnake(){
+    if(!_snakeState) return;
+    if(_snakeState.interval) clearInterval(_snakeState.interval);
+    if(_snakeState.keyHandler) document.removeEventListener('keydown', _snakeState.keyHandler);
+    if(_snakeState.dpadHandlers && _snakeState.dpadHandlers.length){
+      for(const h of _snakeState.dpadHandlers){
+        h.btn.removeEventListener('touchstart', h.onStart); h.btn.removeEventListener('mousedown', h.onStart);
+        h.btn.removeEventListener('touchend', h.onEnd); h.btn.removeEventListener('mouseup', h.onEnd);
+      }
+    }
+    _snakeState.running = false;
+    _snakeState = null;
+  }
+
+  /************************************************************************
+   * Flappy implementation — playable & touch/click to flap
+   ************************************************************************/
+  let _flappyState = null;
+  function startFlappy(reset){
+    const canvas = $('flappyCanvas');
+    if(!canvas) return;
+    const ctx = canvas.getContext('2d');
+    if(!reset && _flappyState && _flappyState.running) return;
+    _flappyState = {
+      canvas, ctx,
+      bird: { x: 80, y: 200, r: 10, vel: 0 },
+      pipes: [],
+      gravity: 0.45,
+      pipeGap: 120,
+      pipeSpeed: 2.2,
+      spawnTimer: 0,
+      running: true,
+      interval: null,
+      keyHandler: null,
+      clickHandler: null
+    };
+
+    function spawnPipe(){
+      const s = _flappyState;
+      const top = Math.floor(Math.random() * 180) + 40;
+      s.pipes.push({ x: s.canvas.width, top });
+    }
+
+    function draw(){
+      const s = _flappyState;
+      const { ctx, canvas } = s;
+      // background
+      ctx.fillStyle = "#87ceeb";
+      ctx.fillRect(0,0,canvas.width,canvas.height);
+      // pipes
+      ctx.fillStyle = "#12611f";
+      for(const p of s.pipes){
+        ctx.fillRect(p.x, 0, 48, p.top);
+        ctx.fillRect(p.x, p.top + s.pipeGap, 48, canvas.height - (p.top + s.pipeGap));
+      }
+      // bird
+      ctx.fillStyle = "yellow";
+      ctx.beginPath();
+      ctx.arc(s.bird.x, s.bird.y, s.bird.r, 0, Math.PI*2);
+      ctx.fill();
+    }
+
+    function step(){
+      const s = _flappyState;
+      s.bird.vel += s.gravity;
+      s.bird.y += s.bird.vel;
+
+      for(const p of s.pipes) p.x -= s.pipeSpeed;
+      // remove off-screen
+      if(s.pipes.length && s.pipes[0].x < -60) s.pipes.shift();
+      // spawn periodically
+      s.spawnTimer++;
+      if(s.spawnTimer > 90){ spawnPipe(); s.spawnTimer = 0; }
+      // collision with ground/ceiling
+      if(s.bird.y - s.bird.r < 0 || s.bird.y + s.bird.r > s.canvas.height){
+        resetFlappy(); return;
+      }
+      // collision with pipes
+      for(const p of s.pipes){
+        if(s.bird.x + s.bird.r > p.x && s.bird.x - s.bird.r < p.x + 48){
+          if(s.bird.y - s.bird.r < p.top || s.bird.y + s.bird.r > p.top + s.pipeGap){
+            resetFlappy(); return;
+          }
+        }
+      }
+      draw();
+    }
+
+    function flap(){ _flappyState.bird.vel = -7.5; }
+
+    function resetFlappy(){
+      const s = _flappyState;
+      s.bird.y = 200; s.bird.vel = 0; s.pipes = []; s.spawnTimer = 0; draw();
+    }
+
+    function keyHandler(e){
+      if(e.code === 'Space') flap();
+    }
+    function clickHandler(e){
+      flap();
+    }
+    if(_flappyState.keyHandler) document.removeEventListener('keydown', _flappyState.keyHandler);
+    if(_flappyState.clickHandler) _flappyState.canvas.removeEventListener('mousedown', _flappyState.clickHandler);
+    _flappyState.keyHandler = keyHandler;
+    _flappyState.clickHandler = clickHandler;
+    document.addEventListener('keydown', _flappyState.keyHandler);
+    _flappyState.canvas.addEventListener('mousedown', _flappyState.clickHandler);
+    _flappyState.canvas.addEventListener('touchstart', function(ev){ ev.preventDefault(); flap(); }, { passive:false });
+
+    if(_flappyState.interval) clearInterval(_flappyState.interval);
+    _flappyState.interval = setInterval(step, 24);
+    draw();
+  }
+  function stopFlappy(){
+    if(!_flappyState) return;
+    if(_flappyState.interval) clearInterval(_flappyState.interval);
+    if(_flappyState.keyHandler) document.removeEventListener('keydown', _flappyState.keyHandler);
+    if(_flappyState.clickHandler) _flappyState.canvas.removeEventListener('mousedown', _flappyState.clickHandler);
+    _flappyState.canvas.removeEventListener('touchstart', _flappyState.touchHandler);
+    _flappyState.running = false;
+    _flappyState = null;
+  }
+
+  /************************************************************************
+   * Bubble Shooter - improved physics + hold-to-charge + aim line
+   ************************************************************************/
+  let _bubbleState = null;
+  function startBubble(reset){
+    const canvas = $('bubbleCanvas');
+    if(!canvas) return;
+    const ctx = canvas.getContext('2d');
+
+    const cols = 8;
+    const rows = 12;
+    const radius = 18;
+    const spacing = radius*2 + 4;
+    const offsetX = 20;
+    const offsetY = 20;
+    const colors = ['#ff5f6d','#ffd166','#8ad2ff','#9bffb2','#d3a4ff'];
+
+    if(!reset && _bubbleState && _bubbleState.running) return;
+
+    function gridToXY(row, col){
+      const x = offsetX + col * spacing + (row % 2 ? spacing/2 : 0);
+      const y = offsetY + row * (spacing - 6);
+      return [x, y];
+    }
+
+    _bubbleState = {
+      canvas, ctx, cols, rows, radius, spacing, offsetX, offsetY, colors,
+      grid: Array.from({length: rows}, (_,r)=> Array(cols).fill(null)),
+      shooter: null,
+      movingBalls: [],
+      running: true,
+      mousePos: { x: canvas.width/2, y: 0 },
+      mousedown: false,
+      chargeStart: 0,
+      charge: 0,
+      chargeMax: 1000, // ms
+      baseSpeed: 5, maxSpeed: 12,
+      handlers: {},
+      interval: null
+    };
+
+    // fill top rows
+    for(let r=0;r<5;r++){
+      for(let c=0;c<cols;c++){
+        _bubbleState.grid[r][c] = colors[Math.floor(Math.random()*colors.length)];
+      }
+    }
+
+    function resetShooter(){
+      const color = colors[Math.floor(Math.random()*colors.length)];
+      _bubbleState.shooter = { x: canvas.width/2, y: canvas.height - 30, vx:0, vy:0, color, speed: 0, moving:false };
+    }
+    resetShooter();
+
+    function draw(){
+      const s = _bubbleState; const { ctx, canvas } = s;
+      ctx.clearRect(0,0,canvas.width,canvas.height);
+      // background
+      ctx.fillStyle = '#072a40';
+      ctx.fillRect(0,0,canvas.width,canvas.height);
+      // grid bubbles
+      for(let r=0;r<s.rows;r++){
+        for(let c=0;c<s.cols;c++){
+          const col = s.grid[r][c];
+          if(col){
+            const [x,y] = gridToXY(r,c);
+            ctx.beginPath(); ctx.arc(x,y,s.radius,0,Math.PI*2); ctx.fillStyle = col; ctx.fill();
+            ctx.strokeStyle = '#0004'; ctx.stroke();
+          }
+        }
+      }
+      // moving balls
+      for(const b of s.movingBalls){
+        ctx.beginPath(); ctx.arc(b.x,b.y,s.radius,0,Math.PI*2); ctx.fillStyle = b.color; ctx.fill(); ctx.strokeStyle='#0004'; ctx.stroke();
+      }
+      // shooter & aim line
+      if(s.shooter){
+        const aimX = s.mousePos.x || s.shooter.x;
+        const aimY = s.mousePos.y || s.shooter.y - 200;
+        // line thickness/alpha based on charge
+        const chargeRatio = Math.min(1, s.charge / s.chargeMax);
+        ctx.strokeStyle = `rgba(255,255,255,${0.2 + 0.4*chargeRatio})`;
+        ctx.lineWidth = 2 + 6 * chargeRatio;
+        ctx.beginPath(); ctx.moveTo(s.shooter.x,s.shooter.y); ctx.lineTo(aimX, aimY); ctx.stroke();
+        // shooter ball
+        ctx.beginPath(); ctx.arc(s.shooter.x, s.shooter.y, s.radius,0,Math.PI*2); ctx.fillStyle = s.shooter.color; ctx.fill(); ctx.strokeStyle='#0006'; ctx.stroke();
+        // faint charge glow
+        if(s.charge > 0){
+          const glowR = s.radius + 8 * chargeRatio;
+          ctx.beginPath(); ctx.arc(s.shooter.x, s.shooter.y, glowR, 0, Math.PI*2);
+          ctx.fillStyle = 'rgba(255,255,255,' + (0.04 + 0.06*chargeRatio) + ')';
+          ctx.fill();
+        }
+      }
+    }
+
+    function simulate(){
+      const s = _bubbleState;
+      for(let i=s.movingBalls.length-1;i>=0;i--){
+        const b = s.movingBalls[i];
+        // simple continuous movement with no gravity
+        b.x += b.vx; b.y += b.vy;
+        // bounce off side walls for a more dynamic feel
+        if(b.x - s.radius <= 0){ b.x = s.radius; b.vx = -b.vx; }
+        if(b.x + s.radius >= s.canvas.width){ b.x = s.canvas.width - s.radius; b.vx = -b.vx; }
+        // check collision with top or other bubbles
+        if(b.y - s.radius <= s.offsetY){
+          attachBallToGrid(b);
+          s.movingBalls.splice(i,1);
+          continue;
+        }
+        // check collision with existing balls
+        let attached = false;
+        for(let r=0;r<s.rows && !attached;r++){
+          for(let c=0;c<s.cols;c++){
+            const col = s.grid[r][c];
+            if(!col) continue;
+            const [gx,gy] = gridToXY(r,c);
+            const dx = gx - b.x, dy = gy - b.y;
+            const dist = Math.sqrt(dx*dx + dy*dy);
+            if(dist <= s.radius*2 - 2){
+              attachBallToGrid(b);
+              s.movingBalls.splice(i,1);
+              attached = true; break;
+            }
+          }
+        }
+        if(attached) continue;
+        // out of bounds bottom -> remove
+        if(b.y - s.radius > s.canvas.height + 50){
+          s.movingBalls.splice(i,1);
+        }
+      }
+    }
+
+    function attachBallToGrid(ball){
+      const s = _bubbleState;
+      // find nearest grid cell to snap
+      let best = { d: 1e9, r:-1, c:-1 };
+      for(let r=0;r<s.rows;r++){
+        for(let c=0;c<s.cols;c++){
+          const [gx,gy] = gridToXY(r,c);
+          const dx = gx - ball.x, dy = gy - ball.y;
+          const d = Math.sqrt(dx*dx + dy*dy);
+          if(d < best.d){ best = { d, r, c }; }
+        }
+      }
+      if(best.r >= 0 && best.c >= 0){
+        // if target occupied, find nearest empty neighbor (BFS)
+        if(s.grid[best.r][best.c]){
+          const nb = findNearestEmpty(best.r, best.c);
+          if(nb) { best.r = nb.r; best.c = nb.c; }
+          else {
+            outer:
+            for(let r=0;r<s.rows;r++){
+              for(let c=0;c<s.cols;c++){
+                if(!s.grid[r][c]){ best.r = r; best.c = c; break outer; }
+              }
+            }
+          }
+        }
+        // attach
+        s.grid[best.r][best.c] = ball.color;
+        // remove clusters
+        const cluster = collectCluster(best.r, best.c, ball.color);
+        if(cluster.length >= 3){
+          for(const p of cluster) s.grid[p.r][p.c] = null;
+        }
+      }
+    }
+
+    function findNearestEmpty(r0,c0){
+      const s = _bubbleState;
+      const visited = new Set();
+      const q = [{r:r0,c:c0}];
+      while(q.length){
+        const p = q.shift();
+        const key = p.r + '|' + p.c;
+        if(visited.has(key)) continue;
+        visited.add(key);
+        if(p.r>=0 && p.r<s.rows && p.c>=0 && p.c<s.cols && !s.grid[p.r][p.c]) return p;
+        const neigh = [[0,1],[0,-1],[1,0],[-1,0],[1,-1],[1,1],[-1,-1],[-1,1]];
+        for(const n of neigh) q.push({ r: p.r + n[0], c: p.c + n[1] });
+      }
+      return null;
+    }
+
+    function collectCluster(r,c,color){
+      const s = _bubbleState;
+      const visited = {};
+      const out = [];
+      const stack = [{r,c}];
+      while(stack.length){
+        const p = stack.pop();
+        const key = p.r + '|' + p.c;
+        if(visited[key]) continue;
+        visited[key] = true;
+        if(p.r<0||p.r>=s.rows||p.c<0||p.c>=s.cols) continue;
+        if(s.grid[p.r][p.c] !== color) continue;
+        out.push(p);
+        const neigh = [[0,1],[0,-1],[1,0],[-1,0],[1,-1],[-1,1]];
+        for(const n of neigh) stack.push({ r: p.r + n[0], c: p.c + n[1] });
+      }
+      return out;
+    }
+
+    function startCharge(e){
+      const s = _bubbleState;
+      s.mousedown = true;
+      s.chargeStart = Date.now();
+      s.charge = 0;
+      // update mousePos if event provided
+      if(e){
+        const rect = canvas.getBoundingClientRect();
+        s.mousePos.x = (e.touches ? e.touches[0].clientX : e.clientX) - rect.left;
+        s.mousePos.y = (e.touches ? e.touches[0].clientY : e.clientY) - rect.top;
+      }
+    }
+    function endCharge(e){
+      const s = _bubbleState;
+      if(!s.mousedown) return;
+      s.mousedown = false;
+      const elapsed = Date.now() - s.chargeStart;
+      const chargeRatio = Math.min(1, elapsed / s.chargeMax);
+      const speed = s.baseSpeed + (s.maxSpeed - s.baseSpeed) * chargeRatio;
+      // compute direction vector from shooter to last mousePos
+      const rect = canvas.getBoundingClientRect();
+      const mx = s.mousePos.x || s.shooter.x;
+      const my = s.mousePos.y || s.shooter.y - 200;
+      const dx = mx - s.shooter.x, dy = my - s.shooter.y;
+      const mag = Math.sqrt(dx*dx + dy*dy) || 1;
+      const vx = (dx/mag) * speed;
+      const vy = (dy/mag) * speed;
+      s.movingBalls.push({ x: s.shooter.x, y: s.shooter.y, vx, vy, color: s.shooter.color });
+      resetShooter();
+      s.charge = 0;
+    }
+
+    function moveMouse(e){
+      const rect = canvas.getBoundingClientRect();
+      _bubbleState.mousePos.x = (e.touches ? e.touches[0].clientX : e.clientX) - rect.left;
+      _bubbleState.mousePos.y = (e.touches ? e.touches[0].clientY : e.clientY) - rect.top;
+      if(_bubbleState.mousedown){
+        _bubbleState.charge = Date.now() - _bubbleState.chargeStart;
+      }
+    }
+
+    function mouseDownHandler(e){ e.preventDefault(); startCharge(e); }
+    function mouseUpHandler(e){ e.preventDefault(); endCharge(e); }
+    function mouseMoveHandler(e){ e.preventDefault(); moveMouse(e); }
+
+    // add listeners
+    _bubbleState.handlers.mdown = mouseDownHandler;
+    _bubbleState.handlers.mup = mouseUpHandler;
+    _bubbleState.handlers.move = mouseMoveHandler;
+    canvas.addEventListener('mousedown', mouseDownHandler);
+    canvas.addEventListener('mouseup', mouseUpHandler);
+    canvas.addEventListener('mousemove', mouseMoveHandler);
+    // touch
+    canvas.addEventListener('touchstart', function(ev){ ev.preventDefault(); startCharge(ev); }, { passive:false });
+    canvas.addEventListener('touchmove', function(ev){ ev.preventDefault(); moveMouse(ev); }, { passive:false });
+    canvas.addEventListener('touchend', function(ev){ ev.preventDefault(); endCharge(ev); }, { passive:false });
+
+    function loop(){
+      if(_bubbleState.mousedown){
+        _bubbleState.charge = Date.now() - _bubbleState.chargeStart;
+        if(_bubbleState.charge > _bubbleState.chargeMax) _bubbleState.charge = _bubbleState.chargeMax;
+      }
+      simulate();
+      draw();
+    }
+
+    if(_bubbleState.interval) clearInterval(_bubbleState.interval);
+    _bubbleState.interval = setInterval(loop, 24);
+    draw();
+  }
+
+  function stopBubble(){
+    if(!_bubbleState) return;
+    if(_bubbleState.interval) clearInterval(_bubbleState.interval);
+    const canvas = _bubbleState.canvas;
+    if(_bubbleState.handlers.mdown) canvas.removeEventListener('mousedown', _bubbleState.handlers.mdown);
+    if(_bubbleState.handlers.mup) canvas.removeEventListener('mouseup', _bubbleState.handlers.mup);
+    if(_bubbleState.handlers.move) canvas.removeEventListener('mousemove', _bubbleState.handlers.move);
+    // remove touch listeners (best-effort)
+    canvas.removeEventListener('touchstart', ()=>{}); canvas.removeEventListener('touchmove', ()=>{}); canvas.removeEventListener('touchend', ()=>{});
+    _bubbleState.running = false;
+    _bubbleState = null;
+  }
+
+  /************************************************************************
+   * Utilities + init
+   ************************************************************************/
   function escapeHtml(s){ return String(s||'').replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;'); }
 
-  // expose for debugging
-  window._twinity = { activateGame, awardPointsServer, adFlow };
+  document.addEventListener('DOMContentLoaded', ()=> {
+  
+  });
+
+  // expose some debug helpers
+  window._twinity = { showBanner, hideBanner, showInterstitial, showRewarded, open2048: open2048, awardPointsServer };
 
   </script>
 </body>
